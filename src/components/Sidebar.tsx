@@ -73,13 +73,12 @@ export function Sidebar({
 
       <section className="panel controls-panel">
         <div className="panel-heading">
-          <p className="eyebrow">Transport</p>
           <button className="play-button" type="button" onClick={onTogglePlayback}>
             {isPlaying ? "Pause" : "Play"}
           </button>
         </div>
 
-        <label className="control-row">
+        <div className="control-row">
           <span>BPM</span>
           <span className="value-readout">{bpm}</span>
           <input
@@ -89,10 +88,10 @@ export function Sidebar({
             value={bpm}
             onChange={(event) => onChangeBpm(Number(event.target.value))}
           />
-        </label>
+        </div>
 
-        <label className="control-row">
-          <span>Master Volume</span>
+        <div className="control-row">
+          <span>Volume</span>
           <span className="value-readout">{Math.round(masterVolume * 100)}</span>
           <input
             type="range"
@@ -102,7 +101,7 @@ export function Sidebar({
             value={masterVolume}
             onChange={(event) => onChangeMasterVolume(Number(event.target.value))}
           />
-        </label>
+        </div>
 
         <p className="tracks-label">Tracks</p>
         <div className="ring-controls">
@@ -156,7 +155,7 @@ export function Sidebar({
                 </button>
               </div>
 
-              <label>
+              <div className="ring-control-param">
                 <span>Steps</span>
                 <input
                   type="number"
@@ -165,9 +164,9 @@ export function Sidebar({
                   value={ring.division}
                   onChange={(event) => onChangeRingDivision(ring.id, Number(event.target.value))}
                 />
-              </label>
+              </div>
 
-              <label>
+              <div className="ring-control-param">
                 <span>Volume</span>
                 <span className="value-readout">{Math.round(ring.volume * 100)}</span>
                 <input
@@ -178,7 +177,7 @@ export function Sidebar({
                   value={ring.volume}
                   onChange={(event) => onChangeRingVolume(ring.id, Number(event.target.value))}
                 />
-              </label>
+              </div>
             </div>
           ))}
           <button className="add-ring-button ring-control add-ring-item" type="button" onClick={onAddRing}>
