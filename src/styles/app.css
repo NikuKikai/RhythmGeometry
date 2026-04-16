@@ -91,7 +91,7 @@ button {
 
 .sidebar {
   display: grid;
-  grid-template-rows: minmax(120px, 0.7fr) minmax(0, 1.3fr);
+  grid-template-rows: minmax(120px, 1fr) minmax(0, 1.5fr);
   gap: 6px;
   min-height: 0;
   overflow: hidden;
@@ -390,20 +390,7 @@ input[type="range"] {
 
 .sequencer-core {
   fill: rgba(248, 239, 228, 0.08);
-  stroke: rgba(248, 239, 228, 0.18);
-}
-
-.core-title,
-.core-subtitle {
-  fill: var(--cream);
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.core-subtitle {
-  fill: var(--text-muted);
-  font-size: 0.8rem;
+  /* stroke: rgba(248, 239, 228, 0.18); */
 }
 
 .ring-cell {

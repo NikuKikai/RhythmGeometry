@@ -28,7 +28,7 @@ export function RadialSequencer({
   return (
     <section className="sequencer-card" aria-label="Circular rhythm editor">
       <svg className="radial-sequencer" viewBox={`0 0 ${SIZE} ${SIZE}`} role="img">
-        <circle className="sequencer-core" cx={CENTER.x} cy={CENTER.y} r="68" />
+        {/* <circle className="sequencer-core" cx={CENTER.x} cy={CENTER.y} r="68" /> */}
 
         {rings.map((ring, ringIndex) => {
           const outerRadius = OUTER_RADIUS - ringIndex * (RING_WIDTH + RING_GAP);
