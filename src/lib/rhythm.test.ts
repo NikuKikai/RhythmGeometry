@@ -32,6 +32,7 @@ describe("rhythm helpers", () => {
     const preset: Preset = {
       id: "triplet-pulse",
       name: "Triplet Pulse",
+      category: "Odd",
       division: 12,
       notes: [0, 4, 8],
     };
