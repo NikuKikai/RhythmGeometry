@@ -16,6 +16,7 @@ import { DEFAULT_RINGS, PRESETS, RING_TEMPLATES } from "./lib/presets";
 import {
   applyPresetToRing,
   changeRingDivision,
+  changeRingVoice,
   clamp,
   clampBpm,
   toggleNote,
@@ -243,7 +244,7 @@ export default function App() {
 
   const handleChangeRingVoice = (ringId: string, voice: DrumVoice) => {
     setRings((current) =>
-      current.map((ring) => (ring.id === ringId ? { ...ring, voice } : ring)),
+      current.map((ring) => (ring.id === ringId ? changeRingVoice(ring, voice) : ring)),
     );
   };
 

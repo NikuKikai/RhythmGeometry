@@ -38,22 +38,13 @@ export function Sidebar({
   onSelectRing,
   onTogglePlayback,
 }: SidebarProps) {
+  const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
+
   return (
     <aside className="sidebar">
       <section className="panel preset-panel">
         <div className="panel-heading">
           <p className="eyebrow">Presets</p>
-          <select
-            value={selectedRingId}
-            onChange={(event) => onSelectRing(event.target.value)}
-            aria-label="Target ring"
-          >
-            {rings.map((ring) => (
-              <option key={ring.id} value={ring.id}>
-                {ring.label}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="preset-list">
@@ -113,15 +104,16 @@ export function Sidebar({
               <div className="ring-control-heading">
                 <button type="button" onClick={() => onSelectRing(ring.id)}>
                   <span className="ring-swatch" style={{ background: ring.color }} />
-                  {ring.label}
+                  <span className="ring-title">{voiceLabels.get(ring.voice) ?? ring.voice}</span>
                 </button>
                 <span className="voice-select-wrap">
                   <select
                     className="voice-select"
                     value={ring.voice}
-                    onChange={(event) =>
-                      onChangeRingVoice(ring.id, event.target.value as DrumVoice)
-                    }
+                    onChange={(event) => {
+                      onSelectRing(ring.id);
+                      onChangeRingVoice(ring.id, event.target.value as DrumVoice);
+                    }}
                     aria-label={`${ring.label} voice`}
                   >
                     {DRUM_VOICES.map((voice) => (

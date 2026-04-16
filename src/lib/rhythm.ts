@@ -88,6 +88,13 @@ export function changeRingDivision(ring: Ring, division: number): Ring {
   };
 }
 
+export function changeRingVoice(ring: Ring, voice: DrumVoice): Ring {
+  return {
+    ...ring,
+    voice,
+  };
+}
+
 export function applyPresetToRing(ring: Ring, preset: Preset): Ring {
   return {
     ...ring,

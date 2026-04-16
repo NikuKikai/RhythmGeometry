@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyPresetToRing,
   changeRingDivision,
+  changeRingVoice,
   getScheduledSteps,
   normalizeNotes,
   type Preset,
@@ -38,6 +39,14 @@ describe("rhythm helpers", () => {
     expect(applyPresetToRing(ring, preset)).toMatchObject({
       division: 12,
       notes: [0, 4, 8],
+    });
+  });
+
+  it("changes the ring voice without changing the rhythm", () => {
+    expect(changeRingVoice(ring, "tom")).toMatchObject({
+      voice: "tom",
+      division: 16,
+      notes: [0, 4, 16, 20],
     });
   });
 

@@ -291,6 +291,13 @@ input[type="range"] {
 
 }
 
+.ring-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .voice-select-wrap {
   position: relative;
   display: grid;
