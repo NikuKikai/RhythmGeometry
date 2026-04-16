@@ -9,7 +9,7 @@ export function Timeline({ cyclePosition, rings }: TimelineProps) {
   return (
     <div className="timeline" aria-label="Shared cycle timeline">
       <div className="timeline-track" style={{ "--track-count": rings.length } as React.CSSProperties}>
-        {rings.map((ring, ringIndex) => (
+        {rings.map((ring) => (
           <div className="timeline-row" key={ring.id} >
             {Array.from({ length: ring.division + 1 }, (_, index) => {
               const position = index / ring.division;
