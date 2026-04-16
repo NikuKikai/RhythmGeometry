@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import type { DrumVoice, Preset, Ring } from "../lib/rhythm";
 import { DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
 
@@ -39,6 +40,15 @@ export function Sidebar({
   onTogglePlayback,
 }: SidebarProps) {
   const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
+  const presetCategories = useMemo(
+    () => Array.from(new Set(presets.map((preset) => preset.category))),
+    [presets],
+  );
+  const [activePresetCategory, setActivePresetCategory] = useState(presetCategories[0] ?? "");
+  const selectedPresetCategory = presetCategories.includes(activePresetCategory)
+    ? activePresetCategory
+    : presetCategories[0] ?? "";
+  const visiblePresets = presets.filter((preset) => preset.category === selectedPresetCategory);
 
   return (
     <aside className="sidebar">
@@ -47,8 +57,23 @@ export function Sidebar({
           <p className="eyebrow">Presets</p>
         </div>
 
+        <div className="preset-tabs" role="tablist" aria-label="Preset categories">
+          {presetCategories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              role="tab"
+              aria-selected={category === selectedPresetCategory}
+              className={category === selectedPresetCategory ? "preset-tab active" : "preset-tab"}
+              onClick={() => setActivePresetCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         <div className="preset-list">
-          {presets.map((preset) => (
+          {visiblePresets.map((preset) => (
             <button
               key={preset.id}
               className="preset-button"

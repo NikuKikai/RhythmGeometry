@@ -117,6 +117,11 @@ button {
   grid-template-rows: auto auto auto auto minmax(0, 1fr);
 }
 
+.preset-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
 .panel-heading {
   display: flex;
   align-items: center;
@@ -154,11 +159,45 @@ input[type="range"] {
   accent-color: var(--accent);
 }
 
+.preset-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 2px;
+  overflow-x: auto;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.preset-tab {
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 3px 7px;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preset-tab:hover,
+.preset-tab.active {
+  border-color: rgba(255, 107, 53, 0.5);
+  color: var(--cream);
+  background: rgba(255, 107, 53, 0.14);
+}
+
 .preset-list {
   display: grid;
+  align-content: start;
   gap: 4px;
-  max-height: calc(100% - 34px);
+  min-height: 0;
   overflow: auto;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.34);
 }
 
 .preset-button,
@@ -450,6 +489,11 @@ input[type="range"] {
   stroke: var(--black);
   stroke-width: 1.4;
   pointer-events: none;
+  transition: fill 90ms ease-out;
+}
+
+.note-dot.triggered {
+  fill: var(--cream);
 }
 
 .playhead-line {

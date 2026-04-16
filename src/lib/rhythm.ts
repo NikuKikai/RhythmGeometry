@@ -21,6 +21,7 @@ export interface Ring {
 export interface Preset {
   id: string;
   name: string;
+  category: string;
   division: number;
   notes: number[];
 }

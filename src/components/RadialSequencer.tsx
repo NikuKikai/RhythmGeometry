@@ -5,6 +5,7 @@ interface RadialSequencerProps {
   rings: Ring[];
   selectedRingId: string;
   cyclePosition: number;
+  isPlaying: boolean;
   onSelectRing: (ringId: string) => void;
   onToggleNote: (ringId: string, noteIndex: number) => void;
 }
@@ -14,11 +15,13 @@ const CENTER = { x: SIZE / 2, y: SIZE / 2 };
 const OUTER_RADIUS = 270;
 const RING_WIDTH = 42;
 const RING_GAP = 12;
+const NOTE_FLASH_WINDOW = 0.035;
 
 export function RadialSequencer({
   rings,
   selectedRingId,
   cyclePosition,
+  isPlaying,
   onSelectRing,
   onToggleNote,
 }: RadialSequencerProps) {
@@ -86,10 +89,14 @@ export function RadialSequencer({
 
               {ring.notes.map((note) => {
                 const point = polarToCartesian(CENTER, noteRadius, note / ring.division);
+                const notePosition = note / ring.division;
+                const elapsedSinceTrigger = (cyclePosition - notePosition + 1) % 1;
+                const isTriggered = isPlaying && elapsedSinceTrigger < NOTE_FLASH_WINDOW;
+
                 return (
                   <circle
                     key={note}
-                    className="note-dot"
+                    className={isTriggered ? "note-dot triggered" : "note-dot"}
                     cx={point.x}
                     cy={point.y}
                     r={isSelected ? 7 : 5}

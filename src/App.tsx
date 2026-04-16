@@ -316,6 +316,7 @@ export default function App() {
             rings={rings}
             selectedRingId={selectedRingId}
             cyclePosition={transport.cyclePosition}
+            isPlaying={transport.isPlaying}
             onSelectRing={setSelectedRingId}
             onToggleNote={handleToggleNote}
           />
