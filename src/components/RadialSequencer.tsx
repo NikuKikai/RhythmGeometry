@@ -13,7 +13,7 @@ interface RadialSequencerProps {
 const SIZE = 620;
 const CENTER = { x: SIZE / 2, y: SIZE / 2 };
 const OUTER_RADIUS = 270;
-const RING_WIDTH = 42;
+const RING_WIDTH = 38;
 const RING_GAP = 12;
 const NOTE_FLASH_WINDOW = 0.035;
 

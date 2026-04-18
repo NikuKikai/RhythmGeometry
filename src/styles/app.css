@@ -516,6 +516,7 @@ input[type="range"] {
   align-items: center;
   padding: 4px 4px;
   overflow: hidden;
+  height: 68px;
 }
 
 .timeline-track {

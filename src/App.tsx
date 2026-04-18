@@ -35,6 +35,7 @@ const INITIAL_TRANSPORT: TransportState = {
 
 const SCHEDULER_INTERVAL_MS = 5;
 const SCHEDULER_TOLERANCE = 0.003;
+const MAX_TRACKS = 5;
 const TRACK_COLORS = [
   "#ff6b35",
   "#f7c948",
@@ -269,6 +270,10 @@ export default function App() {
 
   const handleAddRing = () => {
     setRings((current) => {
+      if (current.length >= MAX_TRACKS) {
+        return current;
+      }
+
       const template =
         RING_TEMPLATES.find((item) => !current.some((ring) => ring.voice === item.voice)) ??
         RING_TEMPLATES[current.length % RING_TEMPLATES.length];
@@ -308,6 +313,7 @@ export default function App() {
           rings={coloredRings}
           selectedRingId={selectedRingId}
           isPlaying={transport.isPlaying}
+          maxTracks={MAX_TRACKS}
           onApplyPreset={handleApplyPreset}
           onChangeBpm={(bpm) =>
             setTransport((current) => ({

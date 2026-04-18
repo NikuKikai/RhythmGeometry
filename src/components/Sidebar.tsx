@@ -9,6 +9,7 @@ interface SidebarProps {
   rings: Ring[];
   selectedRingId: string;
   isPlaying: boolean;
+  maxTracks: number;
   onApplyPreset: (presetId: string) => void;
   onChangeBpm: (bpm: number) => void;
   onChangeMasterVolume: (volume: number) => void;
@@ -28,6 +29,7 @@ export function Sidebar({
   rings,
   selectedRingId,
   isPlaying,
+  maxTracks,
   onApplyPreset,
   onChangeBpm,
   onChangeMasterVolume,
@@ -197,9 +199,11 @@ export function Sidebar({
               </div>
             </div>
           ))}
-          <button className="add-ring-button ring-control add-ring-item" type="button" onClick={onAddRing}>
-            Add Track
-          </button>
+          {rings.length < maxTracks && (
+            <button className="add-ring-button ring-control add-ring-item" type="button" onClick={onAddRing}>
+              Add Track
+            </button>
+          )}
         </div>
       </section>
     </aside>
