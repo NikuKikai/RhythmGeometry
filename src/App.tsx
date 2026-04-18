@@ -35,6 +35,16 @@ const INITIAL_TRANSPORT: TransportState = {
 
 const SCHEDULER_INTERVAL_MS = 5;
 const SCHEDULER_TOLERANCE = 0.003;
+const TRACK_COLORS = [
+  "#ff6b35",
+  "#f7c948",
+  "#6ee7b7",
+  "#60a5fa",
+  "#f472b6",
+  "#a78bfa",
+  "#fb7185",
+  "#34d399",
+];
 
 interface PlaybackClock {
   startedAt: number;
@@ -51,6 +61,15 @@ export default function App() {
   const playbackRef = useRef<PlaybackClock | null>(null);
   const ringsRef = useRef(rings);
   const bpmRef = useRef(transport.bpm);
+
+  const coloredRings = useMemo(
+    () =>
+      rings.map((ring, index) => ({
+        ...ring,
+        color: TRACK_COLORS[index % TRACK_COLORS.length],
+      })),
+    [rings],
+  );
 
   const selectedRing = useMemo(
     () => rings.find((ring) => ring.id === selectedRingId) ?? rings[0],
@@ -286,7 +305,7 @@ export default function App() {
           bpm={transport.bpm}
           masterVolume={transport.masterVolume}
           presets={PRESETS}
-          rings={rings}
+          rings={coloredRings}
           selectedRingId={selectedRingId}
           isPlaying={transport.isPlaying}
           onApplyPreset={handleApplyPreset}
@@ -313,7 +332,7 @@ export default function App() {
 
         <div className="center-stage">
           <RadialSequencer
-            rings={rings}
+            rings={coloredRings}
             selectedRingId={selectedRingId}
             cyclePosition={transport.cyclePosition}
             isPlaying={transport.isPlaying}
@@ -325,7 +344,7 @@ export default function App() {
         <FuturePanel />
       </div>
 
-      <Timeline cyclePosition={transport.cyclePosition} rings={rings} />
+      <Timeline cyclePosition={transport.cyclePosition} rings={coloredRings} />
     </main>
   );
 }
