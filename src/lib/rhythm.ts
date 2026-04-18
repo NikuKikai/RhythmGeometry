@@ -50,6 +50,7 @@ export const MIN_DIVISION = 1;
 export const MAX_DIVISION = 32;
 export const MIN_BPM = 40;
 export const MAX_BPM = 220;
+export const USER_PRESET_CATEGORY = "Favorites";
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);

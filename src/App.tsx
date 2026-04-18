@@ -20,10 +20,19 @@ import {
   clamp,
   clampBpm,
   toggleNote,
+  USER_PRESET_CATEGORY,
+  type GroovePreset,
   type Ring,
   type DrumVoice,
+  type Preset,
   type TransportState,
 } from "./lib/rhythm";
+import {
+  loadTransportSettings,
+  loadUserPresets,
+  saveTransportSettings,
+  saveUserPresets,
+} from "./lib/storage";
 import "./styles/app.css";
 
 const INITIAL_TRANSPORT: TransportState = {
@@ -62,6 +71,9 @@ export default function App() {
   const playbackRef = useRef<PlaybackClock | null>(null);
   const ringsRef = useRef(rings);
   const bpmRef = useRef(transport.bpm);
+  const settingsLoadedRef = useRef(false);
+  const [userGrooves, setUserGrooves] = useState<GroovePreset[]>([]);
+  const [userTrackPresets, setUserTrackPresets] = useState<Preset[]>([]);
 
   const coloredRings = useMemo(
     () =>
@@ -76,6 +88,8 @@ export default function App() {
     () => rings.find((ring) => ring.id === selectedRingId) ?? rings[0],
     [rings, selectedRingId],
   );
+  const groovePresets = useMemo(() => [...userGrooves, ...GROOVE_PRESETS], [userGrooves]);
+  const trackPresets = useMemo(() => [...userTrackPresets, ...PRESETS], [userTrackPresets]);
 
   function getCycleDuration(): number {
     return (60 / bpmRef.current) * 4;
@@ -158,6 +172,39 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([loadUserPresets(), loadTransportSettings()])
+      .then(([storedPresets, storedSettings]) => {
+        if (cancelled) {
+          return;
+        }
+
+        setUserGrooves(storedPresets.grooves);
+        setUserTrackPresets(storedPresets.tracks);
+        if (storedSettings) {
+          setTransport((current) => ({
+            ...current,
+            bpm: clampBpm(storedSettings.bpm),
+            masterVolume: clamp(storedSettings.masterVolume, 0, 1),
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load stored settings", error);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          settingsLoadedRef.current = true;
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     ringsRef.current = rings;
   }, [rings]);
 
@@ -180,6 +227,19 @@ export default function App() {
       setMasterVolume(drumKitRef.current, transport.masterVolume);
     }
   }, [transport.masterVolume]);
+
+  useEffect(() => {
+    if (!settingsLoadedRef.current) {
+      return;
+    }
+
+    saveTransportSettings({
+      bpm: transport.bpm,
+      masterVolume: transport.masterVolume,
+    }).catch((error) => {
+      console.error("Failed to save transport settings", error);
+    });
+  }, [transport.bpm, transport.masterVolume]);
 
   useEffect(() => {
     if (!transport.isPlaying) {
@@ -238,7 +298,7 @@ export default function App() {
   };
 
   const handleApplyPreset = (presetId: string) => {
-    const preset = PRESETS.find((item) => item.id === presetId);
+    const preset = trackPresets.find((item) => item.id === presetId);
     if (!preset || !selectedRing) {
       return;
     }
@@ -269,7 +329,7 @@ export default function App() {
   };
 
   const handleApplyGroovePreset = (presetId: string) => {
-    const groove = GROOVE_PRESETS.find((item) => item.id === presetId);
+    const groove = groovePresets.find((item) => item.id === presetId);
     if (!groove) {
       return;
     }
@@ -284,6 +344,72 @@ export default function App() {
 
     setRings(nextRings);
     setSelectedRingId(nextRings[0]?.id ?? "");
+  };
+
+  const handleSaveGroovePreset = (name: string) => {
+    const savedAt = Date.now();
+    const nextGroove: GroovePreset = {
+      id: `saved-groove-${savedAt}`,
+      name,
+      category: USER_PRESET_CATEGORY,
+      rings: rings.slice(0, MAX_TRACKS).map(({ label, division, notes, voice, volume }) => ({
+        label,
+        division,
+        notes,
+        voice,
+        volume,
+      })),
+    };
+
+    setUserGrooves((current) => {
+      const next = [nextGroove, ...current];
+      saveUserPresets(next, userTrackPresets).catch((error) => {
+        console.error("Failed to save groove preset", error);
+      });
+      return next;
+    });
+  };
+
+  const handleSaveTrackPreset = (name: string) => {
+    if (!selectedRing) {
+      return;
+    }
+
+    const nextPreset: Preset = {
+      id: `saved-track-${Date.now()}`,
+      name,
+      category: USER_PRESET_CATEGORY,
+      division: selectedRing.division,
+      notes: selectedRing.notes,
+    };
+
+    setUserTrackPresets((current) => {
+      const next = [nextPreset, ...current];
+      saveUserPresets(userGrooves, next).catch((error) => {
+        console.error("Failed to save track preset", error);
+      });
+      return next;
+    });
+  };
+
+  const handleDeleteGroovePreset = (presetId: string) => {
+    setUserGrooves((current) => {
+      const next = current.filter((preset) => preset.id !== presetId);
+      saveUserPresets(next, userTrackPresets).catch((error) => {
+        console.error("Failed to delete groove preset", error);
+      });
+      return next;
+    });
+  };
+
+  const handleDeleteTrackPreset = (presetId: string) => {
+    setUserTrackPresets((current) => {
+      const next = current.filter((preset) => preset.id !== presetId);
+      saveUserPresets(userGrooves, next).catch((error) => {
+        console.error("Failed to delete track preset", error);
+      });
+      return next;
+    });
   };
 
   const handleAddRing = () => {
@@ -327,14 +453,18 @@ export default function App() {
         <Sidebar
           bpm={transport.bpm}
           masterVolume={transport.masterVolume}
-          grooves={GROOVE_PRESETS}
-          presets={PRESETS}
+          grooves={groovePresets}
+          presets={trackPresets}
           rings={coloredRings}
           selectedRingId={selectedRingId}
           isPlaying={transport.isPlaying}
           maxTracks={MAX_TRACKS}
           onApplyGroovePreset={handleApplyGroovePreset}
           onApplyPreset={handleApplyPreset}
+          onSaveGroovePreset={handleSaveGroovePreset}
+          onSaveTrackPreset={handleSaveTrackPreset}
+          onDeleteGroovePreset={handleDeleteGroovePreset}
+          onDeleteTrackPreset={handleDeleteTrackPreset}
           onChangeBpm={(bpm) =>
             setTransport((current) => ({
               ...current,
