@@ -12,7 +12,7 @@ import {
   triggerDrum,
   type DrumKitHandle,
 } from "./lib/audio";
-import { DEFAULT_RINGS, PRESETS, RING_TEMPLATES } from "./lib/presets";
+import { DEFAULT_RINGS, GROOVE_PRESETS, PRESETS, RING_TEMPLATES } from "./lib/presets";
 import {
   applyPresetToRing,
   changeRingDivision,
@@ -268,6 +268,24 @@ export default function App() {
     );
   };
 
+  const handleApplyGroovePreset = (presetId: string) => {
+    const groove = GROOVE_PRESETS.find((item) => item.id === presetId);
+    if (!groove) {
+      return;
+    }
+
+    const createdAt = Date.now();
+    const nextRings: Ring[] = groove.rings.slice(0, MAX_TRACKS).map((ring, index) => ({
+      ...ring,
+      id: `${groove.id}-${index}-${createdAt}`,
+      label: `${ring.label} ${index + 1}`,
+      color: TRACK_COLORS[index % TRACK_COLORS.length],
+    }));
+
+    setRings(nextRings);
+    setSelectedRingId(nextRings[0]?.id ?? "");
+  };
+
   const handleAddRing = () => {
     setRings((current) => {
       if (current.length >= MAX_TRACKS) {
@@ -309,11 +327,13 @@ export default function App() {
         <Sidebar
           bpm={transport.bpm}
           masterVolume={transport.masterVolume}
+          grooves={GROOVE_PRESETS}
           presets={PRESETS}
           rings={coloredRings}
           selectedRingId={selectedRingId}
           isPlaying={transport.isPlaying}
           maxTracks={MAX_TRACKS}
+          onApplyGroovePreset={handleApplyGroovePreset}
           onApplyPreset={handleApplyPreset}
           onChangeBpm={(bpm) =>
             setTransport((current) => ({

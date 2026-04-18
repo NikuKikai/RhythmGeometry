@@ -26,6 +26,13 @@ export interface Preset {
   notes: number[];
 }
 
+export interface GroovePreset {
+  id: string;
+  name: string;
+  category: string;
+  rings: Array<Omit<Ring, "id" | "color">>;
+}
+
 export interface TransportState {
   bpm: number;
   masterVolume: number;

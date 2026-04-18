@@ -1,15 +1,19 @@
 import { useMemo, useState } from "react";
-import type { DrumVoice, Preset, Ring } from "../lib/rhythm";
+import type { DrumVoice, GroovePreset, Preset, Ring } from "../lib/rhythm";
 import { DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
+
+type PresetMode = "grooves" | "tracks";
 
 interface SidebarProps {
   bpm: number;
   masterVolume: number;
+  grooves: GroovePreset[];
   presets: Preset[];
   rings: Ring[];
   selectedRingId: string;
   isPlaying: boolean;
   maxTracks: number;
+  onApplyGroovePreset: (presetId: string) => void;
   onApplyPreset: (presetId: string) => void;
   onChangeBpm: (bpm: number) => void;
   onChangeMasterVolume: (volume: number) => void;
@@ -25,11 +29,13 @@ interface SidebarProps {
 export function Sidebar({
   bpm,
   masterVolume,
+  grooves,
   presets,
   rings,
   selectedRingId,
   isPlaying,
   maxTracks,
+  onApplyGroovePreset,
   onApplyPreset,
   onChangeBpm,
   onChangeMasterVolume,
@@ -42,14 +48,17 @@ export function Sidebar({
   onTogglePlayback,
 }: SidebarProps) {
   const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
+  const [presetMode, setPresetMode] = useState<PresetMode>("grooves");
+  const [activePresetCategory, setActivePresetCategory] = useState("");
+  const presetSource = presetMode === "grooves" ? grooves : presets;
   const presetCategories = useMemo(
-    () => Array.from(new Set(presets.map((preset) => preset.category))),
-    [presets],
+    () => Array.from(new Set(presetSource.map((preset) => preset.category))),
+    [presetSource],
   );
-  const [activePresetCategory, setActivePresetCategory] = useState(presetCategories[0] ?? "");
   const selectedPresetCategory = presetCategories.includes(activePresetCategory)
     ? activePresetCategory
     : presetCategories[0] ?? "";
+  const visibleGrooves = grooves.filter((preset) => preset.category === selectedPresetCategory);
   const visiblePresets = presets.filter((preset) => preset.category === selectedPresetCategory);
 
   return (
@@ -57,6 +66,33 @@ export function Sidebar({
       <section className="panel preset-panel">
         <div className="panel-heading">
           <p className="eyebrow">Presets</p>
+        </div>
+
+        <div className="preset-tabs preset-mode-tabs" role="tablist" aria-label="Preset modes">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={presetMode === "grooves"}
+            className={presetMode === "grooves" ? "preset-tab active" : "preset-tab"}
+            onClick={() => {
+              setPresetMode("grooves");
+              setActivePresetCategory("");
+            }}
+          >
+            Groove
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={presetMode === "tracks"}
+            className={presetMode === "tracks" ? "preset-tab active" : "preset-tab"}
+            onClick={() => {
+              setPresetMode("tracks");
+              setActivePresetCategory("");
+            }}
+          >
+            Track
+          </button>
         </div>
 
         <div className="preset-tabs" role="tablist" aria-label="Preset categories">
@@ -75,17 +111,29 @@ export function Sidebar({
         </div>
 
         <div className="preset-list">
-          {visiblePresets.map((preset) => (
-            <button
-              key={preset.id}
-              className="preset-button"
-              type="button"
-              onClick={() => onApplyPreset(preset.id)}
-            >
-              <span>{preset.name}</span>
-              <small>{preset.division} steps</small>
-            </button>
-          ))}
+          {presetMode === "grooves"
+            ? visibleGrooves.map((preset) => (
+                <button
+                  key={preset.id}
+                  className="preset-button"
+                  type="button"
+                  onClick={() => onApplyGroovePreset(preset.id)}
+                >
+                  <span>{preset.name}</span>
+                  <small>{preset.rings.length} tracks</small>
+                </button>
+              ))
+            : visiblePresets.map((preset) => (
+                <button
+                  key={preset.id}
+                  className="preset-button"
+                  type="button"
+                  onClick={() => onApplyPreset(preset.id)}
+                >
+                  <span>{preset.name}</span>
+                  <small>{preset.division} steps</small>
+                </button>
+              ))}
         </div>
       </section>
 
