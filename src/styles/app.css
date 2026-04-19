@@ -73,6 +73,26 @@ button {
   overflow: hidden;
 }
 
+.app-loading {
+  display: grid;
+  place-items: center;
+}
+
+.loading-mark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line);
+  border-top-color: var(--cream);
+  border-radius: 50%;
+  animation: loading-spin 700ms linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .eyebrow {
   margin: 0;
   color: var(--text-muted);

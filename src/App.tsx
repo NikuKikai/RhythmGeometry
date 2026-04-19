@@ -31,6 +31,7 @@ export default function App() {
   const masterVolume = useRhythmStore((state) => state.transport.masterVolume);
   const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
   const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
+  const settingsLoaded = useRhythmStore((state) => state.settingsLoaded);
   const hydrate = useRhythmStore((state) => state.hydrate);
   const setCyclePosition = useRhythmStore((state) => state.setCyclePosition);
   const drumKitRef = useRef<DrumKitHandle | null>(null);
@@ -178,6 +179,14 @@ export default function App() {
       }
     };
   }, [isPlaying, bpm, setCyclePosition]);
+
+  if (!settingsLoaded) {
+    return (
+      <main className="app-shell app-loading" aria-busy="true">
+        <div className="loading-mark" />
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell">

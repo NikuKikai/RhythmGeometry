@@ -82,9 +82,9 @@ export function RadialSequencer() {
     setDragState((current) =>
       current && current.ringId === ringId
         ? {
-            ...current,
-            isRotating: true,
-          }
+          ...current,
+          isRotating: true,
+        }
         : current,
     );
   }
@@ -257,7 +257,6 @@ export function RadialSequencer() {
                       toggleNote(ring.id, stepIndex);
                     }}
                     aria-label={`${ring.label} step ${stepIndex + 1}`}
-                    title={`${ring.label} step ${stepIndex + 1}`}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(event) => {

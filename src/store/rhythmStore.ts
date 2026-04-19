@@ -16,10 +16,13 @@ import {
   type TransportState,
 } from "../lib/rhythm";
 import {
+  loadAppState,
   loadTransportSettings,
   loadUserPresets,
+  saveAppState,
   saveTransportSettings,
   saveUserPresets,
+  type StoredPresetPanelState,
 } from "../lib/storage";
 
 export const MAX_TRACKS = 5;
@@ -42,6 +45,7 @@ interface RhythmState {
   rings: Ring[];
   selectedRingId: string;
   transport: TransportState;
+  presetPanel: StoredPresetPanelState;
   userGrooves: GroovePreset[];
   userTrackPresets: Preset[];
   settingsLoaded: boolean;
@@ -50,6 +54,7 @@ interface RhythmState {
   togglePlayback: () => void;
   setBpm: (bpm: number) => void;
   setMasterVolume: (volume: number) => void;
+  setPresetPanelState: (panelState: Partial<StoredPresetPanelState>) => void;
   selectRing: (ringId: string) => void;
   toggleNote: (ringId: string, noteIndex: number) => void;
   changeRingDivision: (ringId: string, division: number) => void;
@@ -84,6 +89,19 @@ function createRingsFromGroove(groove: GroovePreset): Ring[] {
   }));
 }
 
+function normalizeStoredRings(rings: Ring[]): Ring[] {
+  return colorRings(
+    rings.slice(0, MAX_TRACKS).map((ring) => {
+      const ringWithDivision = changeRingDivision(ring, ring.division);
+      return {
+        ...ringWithDivision,
+        phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
+        volume: clamp(ring.volume, 0, 1),
+      };
+    }),
+  );
+}
+
 function persistUserPresets(grooves: GroovePreset[], tracks: Preset[]): void {
   saveUserPresets(grooves, tracks).catch((error) => {
     console.error("Failed to save user presets", error);
@@ -99,22 +117,64 @@ function persistTransportSettings(transport: TransportState): void {
   });
 }
 
+function persistAppState(state: RhythmState): void {
+  if (!state.settingsLoaded) {
+    return;
+  }
+
+  saveAppState({
+    rings: state.rings,
+    selectedRingId: state.selectedRingId,
+    presetPanel: state.presetPanel,
+  }).catch((error) => {
+    console.error("Failed to save app state", error);
+  });
+}
+
+type SetRhythmState = (
+  partial: Partial<RhythmState> | ((state: RhythmState) => Partial<RhythmState>),
+  replace?: false,
+) => void;
+
+function updateAndPersist(
+  set: SetRhythmState,
+  get: () => RhythmState,
+  partial: Partial<Pick<RhythmState, "rings" | "selectedRingId" | "presetPanel">>,
+): void {
+  set(partial);
+  persistAppState(get());
+}
+
 export const useRhythmStore = create<RhythmState>((set, get) => ({
   rings: DEFAULT_RINGS,
   selectedRingId: DEFAULT_RINGS[0]?.id ?? "",
   transport: INITIAL_TRANSPORT,
+  presetPanel: {
+    mode: "grooves",
+    category: "",
+    selectedPresetId: "",
+  },
   userGrooves: [],
   userTrackPresets: [],
   settingsLoaded: false,
 
   hydrate: async () => {
     try {
-      const [storedPresets, storedSettings] = await Promise.all([
+      const [storedPresets, storedSettings, storedAppState] = await Promise.all([
         loadUserPresets(),
         loadTransportSettings(),
+        loadAppState(),
       ]);
+      const storedRings = storedAppState?.rings?.length
+        ? normalizeStoredRings(storedAppState.rings)
+        : undefined;
 
       set((state) => ({
+        rings: storedRings ?? state.rings,
+        selectedRingId: storedRings?.some((ring) => ring.id === storedAppState?.selectedRingId)
+          ? storedAppState.selectedRingId
+          : storedRings?.[0]?.id ?? state.selectedRingId,
+        presetPanel: storedAppState?.presetPanel ?? state.presetPanel,
         userGrooves: storedPresets.grooves,
         userTrackPresets: storedPresets.tracks,
         transport: storedSettings
@@ -176,84 +236,87 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
     });
   },
 
-  selectRing: (ringId) => set({ selectedRingId: ringId }),
+  setPresetPanelState: (panelState) => {
+    const nextPresetPanel = {
+      ...get().presetPanel,
+      ...panelState,
+    };
+    updateAndPersist(set, get, { presetPanel: nextPresetPanel });
+  },
+
+  selectRing: (ringId) => {
+    updateAndPersist(set, get, { selectedRingId: ringId });
+  },
 
   toggleNote: (ringId, noteIndex) => {
-    set((state) => ({
-      rings: state.rings.map((ring) =>
-        ring.id === ringId
-          ? { ...ring, notes: toggleNote(ring.notes, noteIndex, ring.division) }
-          : ring,
-      ),
-    }));
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId
+        ? { ...ring, notes: toggleNote(ring.notes, noteIndex, ring.division) }
+        : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
   },
 
   changeRingDivision: (ringId, division) => {
-    set((state) => ({
-      rings: state.rings.map((ring) =>
-        ring.id === ringId ? changeRingDivision(ring, division) : ring,
-      ),
-    }));
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId ? changeRingDivision(ring, division) : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
   },
 
   changeRingPhaseOffset: (ringId, phaseOffset) => {
-    set((state) => ({
-      rings: state.rings.map((ring) =>
-        ring.id === ringId ? changeRingPhaseOffset(ring, phaseOffset) : ring,
-      ),
-    }));
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId ? changeRingPhaseOffset(ring, phaseOffset) : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
   },
 
   changeRingVolume: (ringId, volume) => {
-    set((state) => ({
-      rings: state.rings.map((ring) =>
-        ring.id === ringId ? { ...ring, volume: clamp(volume, 0, 1) } : ring,
-      ),
-    }));
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId ? { ...ring, volume: clamp(volume, 0, 1) } : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
   },
 
   changeRingVoice: (ringId, voice) => {
-    set((state) => ({
-      rings: state.rings.map((ring) =>
-        ring.id === ringId ? changeRingVoice(ring, voice) : ring,
-      ),
-    }));
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId ? changeRingVoice(ring, voice) : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
   },
 
   addRing: () => {
-    set((state) => {
-      if (state.rings.length >= MAX_TRACKS) {
-        return state;
-      }
+    const state = get();
+    if (state.rings.length >= MAX_TRACKS) {
+      return;
+    }
 
-      const template =
-        RING_TEMPLATES.find((item) => !state.rings.some((ring) => ring.voice === item.voice)) ??
-        RING_TEMPLATES[state.rings.length % RING_TEMPLATES.length];
-      const nextRing: Ring = {
-        ...template,
-        id: `${template.id}-${Date.now()}`,
-        label: `${template.label} ${state.rings.length + 1}`,
-      };
+    const template =
+      RING_TEMPLATES.find((item) => !state.rings.some((ring) => ring.voice === item.voice)) ??
+      RING_TEMPLATES[state.rings.length % RING_TEMPLATES.length];
+    const nextRing: Ring = {
+      ...template,
+      id: `${template.id}-${Date.now()}`,
+      label: `${template.label} ${state.rings.length + 1}`,
+    };
 
-      return {
-        rings: [...state.rings, nextRing],
-        selectedRingId: nextRing.id,
-      };
+    updateAndPersist(set, get, {
+      rings: colorRings([...state.rings, nextRing]),
+      selectedRingId: nextRing.id,
     });
   },
 
   deleteRing: (ringId) => {
-    set((state) => {
-      if (state.rings.length <= 1) {
-        return state;
-      }
+    const state = get();
+    if (state.rings.length <= 1) {
+      return;
+    }
 
-      const nextRings = state.rings.filter((ring) => ring.id !== ringId);
-      return {
-        rings: nextRings,
-        selectedRingId:
-          state.selectedRingId === ringId ? nextRings[0]?.id ?? "" : state.selectedRingId,
-      };
+    const nextRings = colorRings(state.rings.filter((ring) => ring.id !== ringId));
+    updateAndPersist(set, get, {
+      rings: nextRings,
+      selectedRingId:
+        state.selectedRingId === ringId ? nextRings[0]?.id ?? "" : state.selectedRingId,
     });
   },
 
@@ -264,11 +327,10 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       return;
     }
 
-    set((current) => ({
-      rings: current.rings.map((ring) =>
-        ring.id === current.selectedRingId ? applyPresetToRing(ring, preset) : ring,
-      ),
-    }));
+    const nextRings = state.rings.map((ring) =>
+      ring.id === state.selectedRingId ? applyPresetToRing(ring, preset) : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
   },
 
   applyGroovePreset: (presetId) => {
@@ -279,7 +341,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
     }
 
     const nextRings = createRingsFromGroove(groove);
-    set({
+    updateAndPersist(set, get, {
       rings: nextRings,
       selectedRingId: nextRings[0]?.id ?? "",
     });

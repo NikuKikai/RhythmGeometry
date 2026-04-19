@@ -57,11 +57,13 @@ export function PresetPanel() {
   const saveTrackPreset = useRhythmStore((state) => state.saveTrackPreset);
   const deleteGroovePreset = useRhythmStore((state) => state.deleteGroovePreset);
   const deleteTrackPreset = useRhythmStore((state) => state.deleteTrackPreset);
-  const [presetMode, setPresetMode] = useState<PresetMode>("grooves");
-  const [activePresetCategory, setActivePresetCategory] = useState("");
-  const [selectedPresetId, setSelectedPresetId] = useState("");
+  const presetPanel = useRhythmStore((state) => state.presetPanel);
+  const setPresetPanelState = useRhythmStore((state) => state.setPresetPanelState);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [savePresetName, setSavePresetName] = useState("");
+  const presetMode = presetPanel.mode;
+  const activePresetCategory = presetPanel.category;
+  const selectedPresetId = presetPanel.selectedPresetId;
   const grooves = useMemo(() => [...userGrooves, ...GROOVE_PRESETS], [userGrooves]);
   const presets = useMemo(() => [...userTrackPresets, ...PRESETS], [userTrackPresets]);
   const presetSource = presetMode === "grooves" ? grooves : presets;
@@ -104,8 +106,7 @@ export function PresetPanel() {
 
     setSavePresetName("");
     setIsSaveDialogOpen(false);
-    setActivePresetCategory(USER_PRESET_CATEGORY);
-    setSelectedPresetId("");
+    setPresetPanelState({ category: USER_PRESET_CATEGORY, selectedPresetId: "" });
   }
 
   function handleApplySelectedPreset() {
@@ -130,13 +131,11 @@ export function PresetPanel() {
     } else {
       deleteTrackPreset(selectedPreset.id);
     }
-    setSelectedPresetId("");
+    setPresetPanelState({ selectedPresetId: "" });
   }
 
   function handleChangeMode(mode: PresetMode) {
-    setPresetMode(mode);
-    setActivePresetCategory("");
-    setSelectedPresetId("");
+    setPresetPanelState({ mode, category: "", selectedPresetId: "" });
   }
 
   return (
@@ -180,8 +179,7 @@ export function PresetPanel() {
               title={category === USER_PRESET_CATEGORY ? "Saved presets" : `${category} presets`}
               className={category === selectedPresetCategory ? "preset-tab active" : "preset-tab"}
               onClick={() => {
-                setActivePresetCategory(category);
-                setSelectedPresetId("");
+                setPresetPanelState({ category, selectedPresetId: "" });
               }}
             >
               {category === USER_PRESET_CATEGORY ? <StarIcon className="preset-star-icon" /> : category}
@@ -197,7 +195,7 @@ export function PresetPanel() {
                   className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
                   type="button"
                   title={`${preset.name}: click to select, double-click to apply`}
-                  onClick={() => setSelectedPresetId(preset.id)}
+                  onClick={() => setPresetPanelState({ selectedPresetId: preset.id })}
                   onDoubleClick={() => applyGroovePreset(preset.id)}
                 >
                   <span>{preset.name}</span>
@@ -210,7 +208,7 @@ export function PresetPanel() {
                   className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
                   type="button"
                   title={`${preset.name}: click to select, double-click to apply`}
-                  onClick={() => setSelectedPresetId(preset.id)}
+                  onClick={() => setPresetPanelState({ selectedPresetId: preset.id })}
                   onDoubleClick={() => applyTrackPreset(preset.id)}
                 >
                   <span>{preset.name}</span>

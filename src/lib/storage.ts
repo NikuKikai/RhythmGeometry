@@ -1,14 +1,27 @@
-import type { GroovePreset, Preset } from "./rhythm";
+import type { GroovePreset, Preset, Ring } from "./rhythm";
 
 const DB_NAME = "rhythm-geometry";
 const DB_VERSION = 1;
 const USER_PRESETS_STORE = "userPresets";
 const SETTINGS_STORE = "settings";
 const TRANSPORT_SETTINGS_KEY = "transport";
+const APP_STATE_KEY = "app-state";
 
 export interface StoredTransportSettings {
   bpm: number;
   masterVolume: number;
+}
+
+export interface StoredPresetPanelState {
+  mode: "grooves" | "tracks";
+  category: string;
+  selectedPresetId: string;
+}
+
+export interface StoredAppState {
+  rings: Ring[];
+  selectedRingId: string;
+  presetPanel: StoredPresetPanelState;
 }
 
 interface UserPresetsRecord {
@@ -97,4 +110,12 @@ export function loadTransportSettings(): Promise<StoredTransportSettings | undef
 
 export function saveTransportSettings(settings: StoredTransportSettings): Promise<void> {
   return writeStoreValue(SETTINGS_STORE, settings, TRANSPORT_SETTINGS_KEY);
+}
+
+export function loadAppState(): Promise<StoredAppState | undefined> {
+  return readStoreValue<StoredAppState>(SETTINGS_STORE, APP_STATE_KEY);
+}
+
+export function saveAppState(state: StoredAppState): Promise<void> {
+  return writeStoreValue(SETTINGS_STORE, state, APP_STATE_KEY);
 }
