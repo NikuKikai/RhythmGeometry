@@ -3,28 +3,9 @@ import * as Tone from "tone";
 import type { DrumVoice } from "../lib/rhythm";
 import { DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
 import { colorRings, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
+import { ChevronDownIcon, DeleteIcon } from "./Icons";
 
 const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
-
-function VoiceSelectIcon() {
-  return (
-    <svg className="voice-select-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
-
-function DeleteTrackIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 6h18" />
-      <path d="M8 6V4h8v2" />
-      <path d="M19 6l-1 14H6L5 6" />
-      <path d="M10 11v5" />
-      <path d="M14 11v5" />
-    </svg>
-  );
-}
 
 export function TrackControlsPanel() {
   const rawRings = useRhythmStore((state) => state.rings);
@@ -109,7 +90,7 @@ export function TrackControlsPanel() {
                     </option>
                   ))}
                 </select>
-                <VoiceSelectIcon />
+                <ChevronDownIcon className="voice-select-icon" />
               </span>
               <button
                 className="delete-ring-button"
@@ -118,7 +99,7 @@ export function TrackControlsPanel() {
                 disabled={rings.length <= 1}
                 aria-label={`Delete ${ring.label}`}
               >
-                <DeleteTrackIcon />
+                <DeleteIcon />
               </button>
             </div>
 

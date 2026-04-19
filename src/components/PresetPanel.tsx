@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { USER_PRESET_CATEGORY } from "../lib/rhythm";
 import { GROOVE_PRESETS, PRESETS } from "../lib/presets";
 import { useRhythmStore } from "../store/rhythmStore";
+import { ApplyIcon, DeleteIcon, SaveIcon, StarIcon } from "./Icons";
 
 type PresetMode = "grooves" | "tracks";
 
@@ -10,44 +11,6 @@ interface SavePresetDialogProps {
   onChangeName: (name: string) => void;
   onCancel: () => void;
   onConfirm: () => void;
-}
-
-function StarIcon() {
-  return (
-    <svg className="preset-star-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2.8l2.8 5.7 6.3.9-4.5 4.4 1.1 6.2-5.7-3-5.6 3 1.1-6.2L2.9 9.4l6.3-.9L12 2.8z" />
-    </svg>
-  );
-}
-
-function SaveIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 4h11l3 3v13H5z" />
-      <path d="M8 4v6h8" />
-      <path d="M8 17h8" />
-    </svg>
-  );
-}
-
-function DeleteIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 6h18" />
-      <path d="M8 6V4h8v2" />
-      <path d="M19 6l-1 14H6L5 6" />
-      <path d="M10 11v5" />
-      <path d="M14 11v5" />
-    </svg>
-  );
-}
-
-function ApplyIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M8 5l11 7-11 7z" />
-    </svg>
-  );
 }
 
 function SavePresetDialog({ name, onChangeName, onCancel, onConfirm }: SavePresetDialogProps) {
@@ -213,7 +176,7 @@ export function PresetPanel() {
                 setSelectedPresetId("");
               }}
             >
-              {category === USER_PRESET_CATEGORY ? <StarIcon /> : category}
+              {category === USER_PRESET_CATEGORY ? <StarIcon className="preset-star-icon" /> : category}
             </button>
           ))}
         </div>
