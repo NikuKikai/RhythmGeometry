@@ -1,19 +1,9 @@
 import { useMemo, useState } from "react";
-import type { GroovePreset, Preset } from "../lib/rhythm";
 import { USER_PRESET_CATEGORY } from "../lib/rhythm";
+import { GROOVE_PRESETS, PRESETS } from "../lib/presets";
+import { useRhythmStore } from "../store/rhythmStore";
 
 type PresetMode = "grooves" | "tracks";
-
-interface PresetPanelProps {
-  grooves: GroovePreset[];
-  presets: Preset[];
-  onApplyGroovePreset: (presetId: string) => void;
-  onApplyPreset: (presetId: string) => void;
-  onSaveGroovePreset: (name: string) => void;
-  onSaveTrackPreset: (name: string) => void;
-  onDeleteGroovePreset: (presetId: string) => void;
-  onDeleteTrackPreset: (presetId: string) => void;
-}
 
 interface SavePresetDialogProps {
   name: string;
@@ -93,21 +83,22 @@ function SavePresetDialog({ name, onChangeName, onCancel, onConfirm }: SavePrese
   );
 }
 
-export function PresetPanel({
-  grooves,
-  presets,
-  onApplyGroovePreset,
-  onApplyPreset,
-  onSaveGroovePreset,
-  onSaveTrackPreset,
-  onDeleteGroovePreset,
-  onDeleteTrackPreset,
-}: PresetPanelProps) {
+export function PresetPanel() {
+  const userGrooves = useRhythmStore((state) => state.userGrooves);
+  const userTrackPresets = useRhythmStore((state) => state.userTrackPresets);
+  const applyGroovePreset = useRhythmStore((state) => state.applyGroovePreset);
+  const applyTrackPreset = useRhythmStore((state) => state.applyTrackPreset);
+  const saveGroovePreset = useRhythmStore((state) => state.saveGroovePreset);
+  const saveTrackPreset = useRhythmStore((state) => state.saveTrackPreset);
+  const deleteGroovePreset = useRhythmStore((state) => state.deleteGroovePreset);
+  const deleteTrackPreset = useRhythmStore((state) => state.deleteTrackPreset);
   const [presetMode, setPresetMode] = useState<PresetMode>("grooves");
   const [activePresetCategory, setActivePresetCategory] = useState("");
   const [selectedPresetId, setSelectedPresetId] = useState("");
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [savePresetName, setSavePresetName] = useState("");
+  const grooves = useMemo(() => [...userGrooves, ...GROOVE_PRESETS], [userGrooves]);
+  const presets = useMemo(() => [...userTrackPresets, ...PRESETS], [userTrackPresets]);
   const presetSource = presetMode === "grooves" ? grooves : presets;
   const presetCategories = useMemo(
     () => [
@@ -138,9 +129,9 @@ export function PresetPanel({
   function handleConfirmSave() {
     const name = savePresetName.trim() || defaultSaveName;
     if (presetMode === "grooves") {
-      onSaveGroovePreset(name);
+      saveGroovePreset(name);
     } else {
-      onSaveTrackPreset(name);
+      saveTrackPreset(name);
     }
 
     setSavePresetName("");
@@ -155,9 +146,9 @@ export function PresetPanel({
     }
 
     if (presetMode === "grooves") {
-      onApplyGroovePreset(selectedPreset.id);
+      applyGroovePreset(selectedPreset.id);
     } else {
-      onApplyPreset(selectedPreset.id);
+      applyTrackPreset(selectedPreset.id);
     }
   }
 
@@ -167,9 +158,9 @@ export function PresetPanel({
     }
 
     if (presetMode === "grooves") {
-      onDeleteGroovePreset(selectedPreset.id);
+      deleteGroovePreset(selectedPreset.id);
     } else {
-      onDeleteTrackPreset(selectedPreset.id);
+      deleteTrackPreset(selectedPreset.id);
     }
     setSelectedPresetId("");
   }
@@ -235,7 +226,7 @@ export function PresetPanel({
                   className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
                   type="button"
                   onClick={() => setSelectedPresetId(preset.id)}
-                  onDoubleClick={() => onApplyGroovePreset(preset.id)}
+                  onDoubleClick={() => applyGroovePreset(preset.id)}
                 >
                   <span>{preset.name}</span>
                   <small>{preset.rings.length} tracks</small>
@@ -247,7 +238,7 @@ export function PresetPanel({
                   className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
                   type="button"
                   onClick={() => setSelectedPresetId(preset.id)}
-                  onDoubleClick={() => onApplyPreset(preset.id)}
+                  onDoubleClick={() => applyTrackPreset(preset.id)}
                 >
                   <span>{preset.name}</span>
                   <small>{preset.division} steps</small>

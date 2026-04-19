@@ -1,11 +1,11 @@
-import type { Ring } from "../lib/rhythm";
+import { useMemo } from "react";
+import { colorRings, useRhythmStore } from "../store/rhythmStore";
 
-interface TimelineProps {
-  cyclePosition: number;
-  rings: Ring[];
-}
+export function Timeline() {
+  const rawRings = useRhythmStore((state) => state.rings);
+  const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
+  const rings = useMemo(() => colorRings(rawRings), [rawRings]);
 
-export function Timeline({ cyclePosition, rings }: TimelineProps) {
   return (
     <div className="timeline" aria-label="Shared cycle timeline">
       <div className="timeline-track" style={{ "--track-count": rings.length } as React.CSSProperties}>

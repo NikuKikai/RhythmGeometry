@@ -1,23 +1,8 @@
-import type { DrumVoice, Ring } from "../lib/rhythm";
+import { useMemo } from "react";
+import * as Tone from "tone";
+import type { DrumVoice } from "../lib/rhythm";
 import { DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
-
-interface TrackControlsPanelProps {
-  bpm: number;
-  masterVolume: number;
-  rings: Ring[];
-  selectedRingId: string;
-  isPlaying: boolean;
-  maxTracks: number;
-  onChangeBpm: (bpm: number) => void;
-  onChangeMasterVolume: (volume: number) => void;
-  onChangeRingDivision: (ringId: string, division: number) => void;
-  onChangeRingVolume: (ringId: string, volume: number) => void;
-  onChangeRingVoice: (ringId: string, voice: DrumVoice) => void;
-  onAddRing: () => void;
-  onDeleteRing: (ringId: string) => void;
-  onSelectRing: (ringId: string) => void;
-  onTogglePlayback: () => void;
-}
+import { colorRings, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
 
 const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
 
@@ -41,27 +26,32 @@ function DeleteTrackIcon() {
   );
 }
 
-export function TrackControlsPanel({
-  bpm,
-  masterVolume,
-  rings,
-  selectedRingId,
-  isPlaying,
-  maxTracks,
-  onChangeBpm,
-  onChangeMasterVolume,
-  onChangeRingDivision,
-  onChangeRingVolume,
-  onChangeRingVoice,
-  onAddRing,
-  onDeleteRing,
-  onSelectRing,
-  onTogglePlayback,
-}: TrackControlsPanelProps) {
+export function TrackControlsPanel() {
+  const rawRings = useRhythmStore((state) => state.rings);
+  const selectedRingId = useRhythmStore((state) => state.selectedRingId);
+  const bpm = useRhythmStore((state) => state.transport.bpm);
+  const masterVolume = useRhythmStore((state) => state.transport.masterVolume);
+  const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
+  const changeBpm = useRhythmStore((state) => state.setBpm);
+  const changeMasterVolume = useRhythmStore((state) => state.setMasterVolume);
+  const changeRingDivision = useRhythmStore((state) => state.changeRingDivision);
+  const changeRingVolume = useRhythmStore((state) => state.changeRingVolume);
+  const changeRingVoice = useRhythmStore((state) => state.changeRingVoice);
+  const addRing = useRhythmStore((state) => state.addRing);
+  const deleteRing = useRhythmStore((state) => state.deleteRing);
+  const selectRing = useRhythmStore((state) => state.selectRing);
+  const togglePlayback = useRhythmStore((state) => state.togglePlayback);
+  const rings = useMemo(() => colorRings(rawRings), [rawRings]);
+
+  async function handleTogglePlayback() {
+    await Tone.start();
+    togglePlayback();
+  }
+
   return (
     <section className="panel controls-panel">
       <div className="panel-heading">
-        <button className="play-button" type="button" onClick={onTogglePlayback}>
+        <button className="play-button" type="button" onClick={handleTogglePlayback}>
           {isPlaying ? "Pause" : "Play"}
         </button>
       </div>
@@ -74,7 +64,7 @@ export function TrackControlsPanel({
           min={MIN_BPM}
           max={MAX_BPM}
           value={bpm}
-          onChange={(event) => onChangeBpm(Number(event.target.value))}
+          onChange={(event) => changeBpm(Number(event.target.value))}
         />
       </div>
 
@@ -87,7 +77,7 @@ export function TrackControlsPanel({
           max="1"
           step="0.01"
           value={masterVolume}
-          onChange={(event) => onChangeMasterVolume(Number(event.target.value))}
+          onChange={(event) => changeMasterVolume(Number(event.target.value))}
         />
       </div>
 
@@ -99,7 +89,7 @@ export function TrackControlsPanel({
             className={ring.id === selectedRingId ? "ring-control active" : "ring-control"}
           >
             <div className="ring-control-heading">
-              <button type="button" onClick={() => onSelectRing(ring.id)}>
+              <button type="button" onClick={() => selectRing(ring.id)}>
                 <span className="ring-swatch" style={{ background: ring.color }} />
                 <span className="ring-title">{voiceLabels.get(ring.voice) ?? ring.voice}</span>
               </button>
@@ -108,8 +98,8 @@ export function TrackControlsPanel({
                   className="voice-select"
                   value={ring.voice}
                   onChange={(event) => {
-                    onSelectRing(ring.id);
-                    onChangeRingVoice(ring.id, event.target.value as DrumVoice);
+                    selectRing(ring.id);
+                    changeRingVoice(ring.id, event.target.value as DrumVoice);
                   }}
                   aria-label={`${ring.label} voice`}
                 >
@@ -124,7 +114,7 @@ export function TrackControlsPanel({
               <button
                 className="delete-ring-button"
                 type="button"
-                onClick={() => onDeleteRing(ring.id)}
+                onClick={() => deleteRing(ring.id)}
                 disabled={rings.length <= 1}
                 aria-label={`Delete ${ring.label}`}
               >
@@ -139,7 +129,7 @@ export function TrackControlsPanel({
                 min={MIN_DIVISION}
                 max={MAX_DIVISION}
                 value={ring.division}
-                onChange={(event) => onChangeRingDivision(ring.id, Number(event.target.value))}
+                onChange={(event) => changeRingDivision(ring.id, Number(event.target.value))}
               />
             </div>
 
@@ -152,13 +142,13 @@ export function TrackControlsPanel({
                 max="1"
                 step="0.01"
                 value={ring.volume}
-                onChange={(event) => onChangeRingVolume(ring.id, Number(event.target.value))}
+                onChange={(event) => changeRingVolume(ring.id, Number(event.target.value))}
               />
             </div>
           </div>
         ))}
-        {rings.length < maxTracks && (
-          <button className="add-ring-button ring-control add-ring-item" type="button" onClick={onAddRing}>
+        {rings.length < MAX_TRACKS && (
+          <button className="add-ring-button ring-control add-ring-item" type="button" onClick={addRing}>
             Add Track
           </button>
         )}

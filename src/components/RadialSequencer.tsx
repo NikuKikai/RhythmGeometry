@@ -1,14 +1,6 @@
+import { useMemo } from "react";
 import { getNotePolygonPoints, getRingCellPath, polarToCartesian } from "../lib/geometry";
-import type { Ring } from "../lib/rhythm";
-
-interface RadialSequencerProps {
-  rings: Ring[];
-  selectedRingId: string;
-  cyclePosition: number;
-  isPlaying: boolean;
-  onSelectRing: (ringId: string) => void;
-  onToggleNote: (ringId: string, noteIndex: number) => void;
-}
+import { colorRings, useRhythmStore } from "../store/rhythmStore";
 
 const SIZE = 620;
 const CENTER = { x: SIZE / 2, y: SIZE / 2 };
@@ -17,14 +9,14 @@ const RING_WIDTH = 38;
 const RING_GAP = 12;
 const NOTE_FLASH_WINDOW = 0.035;
 
-export function RadialSequencer({
-  rings,
-  selectedRingId,
-  cyclePosition,
-  isPlaying,
-  onSelectRing,
-  onToggleNote,
-}: RadialSequencerProps) {
+export function RadialSequencer() {
+  const rawRings = useRhythmStore((state) => state.rings);
+  const selectedRingId = useRhythmStore((state) => state.selectedRingId);
+  const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
+  const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
+  const selectRing = useRhythmStore((state) => state.selectRing);
+  const toggleNote = useRhythmStore((state) => state.toggleNote);
+  const rings = useMemo(() => colorRings(rawRings), [rawRings]);
   const playheadStart = polarToCartesian(CENTER, OUTER_RADIUS + 8, cyclePosition);
   const playheadEnd = polarToCartesian(CENTER, OUTER_RADIUS + 30, cyclePosition);
 
@@ -60,8 +52,8 @@ export function RadialSequencer({
                       "--ring-color": ring.color,
                     } as React.CSSProperties}
                     onClick={() => {
-                      onSelectRing(ring.id);
-                      onToggleNote(ring.id, stepIndex);
+                      selectRing(ring.id);
+                      toggleNote(ring.id, stepIndex);
                     }}
                     aria-label={`${ring.label} step ${stepIndex + 1}`}
                     role="button"
@@ -69,8 +61,8 @@ export function RadialSequencer({
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
-                        onSelectRing(ring.id);
-                        onToggleNote(ring.id, stepIndex);
+                        selectRing(ring.id);
+                        toggleNote(ring.id, stepIndex);
                       }
                     }}
                   />
