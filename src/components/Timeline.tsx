@@ -11,9 +11,9 @@ export function Timeline() {
       <div className="timeline-track" style={{ "--track-count": rings.length } as React.CSSProperties}>
         {rings.map((ring) => (
           <div className="timeline-row" key={ring.id} >
-            {Array.from({ length: ring.division + 1 }, (_, index) => {
-              const position = index / ring.division;
-              const isStrong = index === 0 || index === ring.division || index % Math.max(1, ring.division / 4) === 0;
+            {Array.from({ length: ring.division }, (_, index) => {
+              const position = ((index + ring.phaseOffset) / ring.division) % 1;
+              const isStrong = index === 0 || index % Math.max(1, ring.division / 4) === 0;
 
               return (
                 <span
@@ -28,7 +28,7 @@ export function Timeline() {
                 key={note}
                 className="timeline-note"
                 style={{
-                  left: `${(note / ring.division) * 100}%`,
+                  left: `${(((note + ring.phaseOffset) / ring.division) % 1) * 100}%`,
                   background: ring.color,
                 }}
               />

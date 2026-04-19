@@ -16,6 +16,7 @@ export function TrackControlsPanel() {
   const changeBpm = useRhythmStore((state) => state.setBpm);
   const changeMasterVolume = useRhythmStore((state) => state.setMasterVolume);
   const changeRingDivision = useRhythmStore((state) => state.changeRingDivision);
+  const changeRingPhaseOffset = useRhythmStore((state) => state.changeRingPhaseOffset);
   const changeRingVolume = useRhythmStore((state) => state.changeRingVolume);
   const changeRingVoice = useRhythmStore((state) => state.changeRingVoice);
   const addRing = useRhythmStore((state) => state.addRing);
@@ -32,7 +33,12 @@ export function TrackControlsPanel() {
   return (
     <section className="panel controls-panel">
       <div className="panel-heading">
-        <button className="play-button" type="button" onClick={handleTogglePlayback}>
+        <button
+          className="play-button"
+          type="button"
+          onClick={handleTogglePlayback}
+          title={isPlaying ? "Pause playback" : "Start playback"}
+        >
           {isPlaying ? "Pause" : "Play"}
         </button>
       </div>
@@ -70,7 +76,7 @@ export function TrackControlsPanel() {
             className={ring.id === selectedRingId ? "ring-control active" : "ring-control"}
           >
             <div className="ring-control-heading">
-              <button type="button" onClick={() => selectRing(ring.id)}>
+              <button type="button" onClick={() => selectRing(ring.id)} title={`Select ${ring.label}`}>
                 <span className="ring-swatch" style={{ background: ring.color }} />
                 <span className="ring-title">{voiceLabels.get(ring.voice) ?? ring.voice}</span>
               </button>
@@ -83,6 +89,7 @@ export function TrackControlsPanel() {
                     changeRingVoice(ring.id, event.target.value as DrumVoice);
                   }}
                   aria-label={`${ring.label} voice`}
+                  title={`Change ${ring.label} voice`}
                 >
                   {DRUM_VOICES.map((voice) => (
                     <option key={voice.value} value={voice.value}>
@@ -98,6 +105,7 @@ export function TrackControlsPanel() {
                 onClick={() => deleteRing(ring.id)}
                 disabled={rings.length <= 1}
                 aria-label={`Delete ${ring.label}`}
+                title={`Delete ${ring.label}`}
               >
                 <DeleteIcon />
               </button>
@@ -111,6 +119,20 @@ export function TrackControlsPanel() {
                 max={MAX_DIVISION}
                 value={ring.division}
                 onChange={(event) => changeRingDivision(ring.id, Number(event.target.value))}
+              />
+            </div>
+
+            <div className="ring-control-param">
+              <span>Offset</span>
+              <span className="value-readout">{ring.phaseOffset.toFixed(2)}</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.001"
+                value={ring.phaseOffset}
+                onChange={(event) => changeRingPhaseOffset(ring.id, Number(event.target.value))}
+                title={`${ring.label} phase offset`}
               />
             </div>
 
@@ -129,7 +151,12 @@ export function TrackControlsPanel() {
           </div>
         ))}
         {rings.length < MAX_TRACKS && (
-          <button className="add-ring-button ring-control add-ring-item" type="button" onClick={addRing}>
+          <button
+            className="add-ring-button ring-control add-ring-item"
+            type="button"
+            onClick={addRing}
+            title="Add track"
+          >
             Add Track
           </button>
         )}

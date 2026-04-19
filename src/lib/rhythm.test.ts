@@ -14,6 +14,7 @@ const ring: Ring = {
   label: "Kick",
   division: 16,
   notes: [0, 4, 16, 20],
+  phaseOffset: 0,
   voice: "kick",
   volume: 0.8,
   color: "#ff6b35",
@@ -40,6 +41,7 @@ describe("rhythm helpers", () => {
     expect(applyPresetToRing(ring, preset)).toMatchObject({
       division: 12,
       notes: [0, 4, 8],
+      phaseOffset: 0,
     });
   });
 
@@ -51,6 +53,14 @@ describe("rhythm helpers", () => {
     });
   });
 
+  it("applies preset phase offsets", () => {
+    expect(applyPresetToRing(ring, { id: "late", name: "Late", category: "Basic", division: 4, notes: [0], phaseOffset: 0.5 })).toMatchObject({
+      division: 4,
+      notes: [0],
+      phaseOffset: 0.5,
+    });
+  });
+
   it("maps different ring divisions into one normalized cycle", () => {
     expect(
       getScheduledSteps([
@@ -58,6 +68,13 @@ describe("rhythm helpers", () => {
         { ...ring, id: "hat", division: 8, notes: [0, 2, 4, 6] },
       ]).map((step) => step.position),
     ).toEqual([0, 0.25, 0.5, 0.75, 0, 0.25, 0.5, 0.75]);
+  });
+
+  it("includes phase offsets in scheduled positions", () => {
+    expect(getScheduledSteps([{ ...ring, division: 4, notes: [0, 1], phaseOffset: 0.5 }]).map((step) => step.position)).toEqual([
+      0.125,
+      0.375,
+    ]);
   });
 });
 

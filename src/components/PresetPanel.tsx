@@ -36,10 +36,12 @@ function SavePresetDialog({ name, onChangeName, onCancel, onConfirm }: SavePrese
           />
         </label>
         <div className="preset-dialog-actions">
-          <button type="button" onClick={onCancel}>
+          <button type="button" onClick={onCancel} title="Cancel saving preset">
             Cancel
           </button>
-          <button type="submit">OK</button>
+          <button type="submit" title="Save preset">
+            OK
+          </button>
         </div>
       </form>
     </div>
@@ -88,6 +90,9 @@ export function PresetPanel() {
   const canDeleteSelectedPreset =
     selectedPresetCategory === USER_PRESET_CATEGORY && selectedPreset !== undefined;
   const defaultSaveName = presetMode === "grooves" ? "Saved Groove" : "Saved Track";
+  const savePresetLabel = presetMode === "grooves" ? "Save groove preset" : "Save track preset";
+  const deletePresetLabel = presetMode === "grooves" ? "Delete selected groove preset" : "Delete selected track preset";
+  const applyPresetLabel = presetMode === "grooves" ? "Apply selected groove preset" : "Apply selected track preset";
 
   function handleConfirmSave() {
     const name = savePresetName.trim() || defaultSaveName;
@@ -146,6 +151,7 @@ export function PresetPanel() {
             type="button"
             role="tab"
             aria-selected={presetMode === "grooves"}
+            title="Show groove presets"
             className={presetMode === "grooves" ? "preset-tab active" : "preset-tab"}
             onClick={() => handleChangeMode("grooves")}
           >
@@ -155,6 +161,7 @@ export function PresetPanel() {
             type="button"
             role="tab"
             aria-selected={presetMode === "tracks"}
+            title="Show track presets"
             className={presetMode === "tracks" ? "preset-tab active" : "preset-tab"}
             onClick={() => handleChangeMode("tracks")}
           >
@@ -170,6 +177,7 @@ export function PresetPanel() {
               role="tab"
               aria-selected={category === selectedPresetCategory}
               aria-label={category === USER_PRESET_CATEGORY ? "Saved presets" : undefined}
+              title={category === USER_PRESET_CATEGORY ? "Saved presets" : `${category} presets`}
               className={category === selectedPresetCategory ? "preset-tab active" : "preset-tab"}
               onClick={() => {
                 setActivePresetCategory(category);
@@ -188,6 +196,7 @@ export function PresetPanel() {
                   key={preset.id}
                   className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
                   type="button"
+                  title={`${preset.name}: click to select, double-click to apply`}
                   onClick={() => setSelectedPresetId(preset.id)}
                   onDoubleClick={() => applyGroovePreset(preset.id)}
                 >
@@ -200,6 +209,7 @@ export function PresetPanel() {
                   key={preset.id}
                   className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
                   type="button"
+                  title={`${preset.name}: click to select, double-click to apply`}
                   onClick={() => setSelectedPresetId(preset.id)}
                   onDoubleClick={() => applyTrackPreset(preset.id)}
                 >
@@ -217,7 +227,8 @@ export function PresetPanel() {
               setSavePresetName(defaultSaveName);
               setIsSaveDialogOpen(true);
             }}
-            aria-label={presetMode === "grooves" ? "Save groove preset" : "Save track preset"}
+            aria-label={savePresetLabel}
+            title={savePresetLabel}
           >
             <SaveIcon />
           </button>
@@ -226,7 +237,8 @@ export function PresetPanel() {
             type="button"
             onClick={handleDeleteSelectedPreset}
             disabled={!canDeleteSelectedPreset}
-            aria-label={presetMode === "grooves" ? "Delete selected groove preset" : "Delete selected track preset"}
+            aria-label={deletePresetLabel}
+            title={deletePresetLabel}
           >
             <DeleteIcon />
           </button>
@@ -236,7 +248,8 @@ export function PresetPanel() {
             type="button"
             onClick={handleApplySelectedPreset}
             disabled={!selectedPreset}
-            aria-label={presetMode === "grooves" ? "Apply selected groove preset" : "Apply selected track preset"}
+            aria-label={applyPresetLabel}
+            title={applyPresetLabel}
           >
             <ApplyIcon />
           </button>

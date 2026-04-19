@@ -58,7 +58,7 @@ export default function App() {
 
     ringsRef.current.forEach((ring) => {
       ring.notes.forEach((note) => {
-        const notePosition = note / ring.division;
+        const notePosition = ((note + ring.phaseOffset) / ring.division) % 1;
         const firstCycle = Math.floor(from) - 1;
         const lastCycle = Math.floor(to) + 1;
 

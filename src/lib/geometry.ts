@@ -9,6 +9,7 @@ export interface RingCellPathInput {
   outerRadius: number;
   stepIndex: number;
   division: number;
+  phaseOffset?: number;
   gapRadians?: number;
 }
 
@@ -31,9 +32,10 @@ export function getNotePolygonPoints(
   division: number,
   center: Point,
   radius: number,
+  phaseOffset = 0,
 ): string {
   return notes
-    .map((note) => polarToCartesian(center, radius, note / division))
+    .map((note) => polarToCartesian(center, radius, (note + phaseOffset) / division))
     .map((point) => `${round(point.x)},${round(point.y)}`)
     .join(" ");
 }
@@ -44,11 +46,12 @@ export function getRingCellPath({
   outerRadius,
   stepIndex,
   division,
+  phaseOffset = 0,
   gapRadians = 0.012,
 }: RingCellPathInput): string {
   const stepSize = (Math.PI * 2) / division;
-  const startAngle = START_ANGLE + stepIndex * stepSize + gapRadians;
-  const endAngle = START_ANGLE + (stepIndex + 1) * stepSize - gapRadians;
+  const startAngle = START_ANGLE + (stepIndex + phaseOffset) * stepSize + gapRadians;
+  const endAngle = START_ANGLE + (stepIndex + 1 + phaseOffset) * stepSize - gapRadians;
   const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
 
   const outerStart = pointAtAngle(center, outerRadius, startAngle);

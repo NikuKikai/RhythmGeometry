@@ -3,6 +3,7 @@ import { DEFAULT_RINGS, GROOVE_PRESETS, PRESETS, RING_TEMPLATES } from "../lib/p
 import {
   applyPresetToRing,
   changeRingDivision,
+  changeRingPhaseOffset,
   changeRingVoice,
   clamp,
   clampBpm,
@@ -52,6 +53,7 @@ interface RhythmState {
   selectRing: (ringId: string) => void;
   toggleNote: (ringId: string, noteIndex: number) => void;
   changeRingDivision: (ringId: string, division: number) => void;
+  changeRingPhaseOffset: (ringId: string, phaseOffset: number) => void;
   changeRingVolume: (ringId: string, volume: number) => void;
   changeRingVoice: (ringId: string, voice: DrumVoice) => void;
   addRing: () => void;
@@ -75,6 +77,7 @@ function createRingsFromGroove(groove: GroovePreset): Ring[] {
   const createdAt = Date.now();
   return groove.rings.slice(0, MAX_TRACKS).map((ring, index) => ({
     ...ring,
+    phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
     id: `${groove.id}-${index}-${createdAt}`,
     label: `${ring.label} ${index + 1}`,
     color: TRACK_COLORS[index % TRACK_COLORS.length],
@@ -193,6 +196,14 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
     }));
   },
 
+  changeRingPhaseOffset: (ringId, phaseOffset) => {
+    set((state) => ({
+      rings: state.rings.map((ring) =>
+        ring.id === ringId ? changeRingPhaseOffset(ring, phaseOffset) : ring,
+      ),
+    }));
+  },
+
   changeRingVolume: (ringId, volume) => {
     set((state) => ({
       rings: state.rings.map((ring) =>
@@ -281,10 +292,11 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       id: `saved-groove-${savedAt}`,
       name,
       category: USER_PRESET_CATEGORY,
-      rings: state.rings.slice(0, MAX_TRACKS).map(({ label, division, notes, voice, volume }) => ({
+      rings: state.rings.slice(0, MAX_TRACKS).map(({ label, division, notes, phaseOffset, voice, volume }) => ({
         label,
         division,
         notes,
+        phaseOffset,
         voice,
         volume,
       })),
@@ -307,6 +319,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       category: USER_PRESET_CATEGORY,
       division: selectedRing.division,
       notes: selectedRing.notes,
+      phaseOffset: selectedRing.phaseOffset,
     };
     const nextTrackPresets = [nextPreset, ...state.userTrackPresets];
     persistUserPresets(state.userGrooves, nextTrackPresets);

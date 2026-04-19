@@ -13,6 +13,7 @@ export interface Ring {
   label: string;
   division: number;
   notes: number[];
+  phaseOffset: number;
   voice: DrumVoice;
   volume: number;
   color: string;
@@ -24,13 +25,14 @@ export interface Preset {
   category: string;
   division: number;
   notes: number[];
+  phaseOffset?: number;
 }
 
 export interface GroovePreset {
   id: string;
   name: string;
   category: string;
-  rings: Array<Omit<Ring, "id" | "color">>;
+  rings: Array<Omit<Ring, "id" | "color" | "phaseOffset"> & { phaseOffset?: number }>;
 }
 
 export interface TransportState {
@@ -62,6 +64,10 @@ export function clampDivision(value: number): number {
 
 export function clampBpm(value: number): number {
   return Math.round(clamp(value, MIN_BPM, MAX_BPM));
+}
+
+export function clampPhaseOffset(value: number): number {
+  return clamp(value, 0, 1);
 }
 
 export function normalizeNotes(notes: number[], division: number): number[] {
@@ -104,11 +110,19 @@ export function changeRingVoice(ring: Ring, voice: DrumVoice): Ring {
   };
 }
 
+export function changeRingPhaseOffset(ring: Ring, phaseOffset: number): Ring {
+  return {
+    ...ring,
+    phaseOffset: clampPhaseOffset(phaseOffset),
+  };
+}
+
 export function applyPresetToRing(ring: Ring, preset: Preset): Ring {
   return {
     ...ring,
     division: clampDivision(preset.division),
     notes: normalizeNotes(preset.notes, preset.division),
+    phaseOffset: clampPhaseOffset(preset.phaseOffset ?? 0),
   };
 }
 
@@ -117,7 +131,7 @@ export function getScheduledSteps(rings: Ring[]): ScheduledStep[] {
     normalizeNotes(ring.notes, ring.division).map((noteIndex) => ({
       ringId: ring.id,
       noteIndex,
-      position: noteIndex / ring.division,
+      position: ((noteIndex + ring.phaseOffset) / ring.division) % 1,
     })),
   );
 }
