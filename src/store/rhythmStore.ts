@@ -168,11 +168,12 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       const storedRings = storedAppState?.rings?.length
         ? normalizeStoredRings(storedAppState.rings)
         : undefined;
+      const storedSelectedRingId = storedAppState?.selectedRingId;
 
       set((state) => ({
         rings: storedRings ?? state.rings,
-        selectedRingId: storedRings?.some((ring) => ring.id === storedAppState?.selectedRingId)
-          ? storedAppState.selectedRingId
+        selectedRingId: storedRings?.some((ring) => ring.id === storedSelectedRingId)
+          ? storedSelectedRingId
           : storedRings?.[0]?.id ?? state.selectedRingId,
         presetPanel: storedAppState?.presetPanel ?? state.presetPanel,
         userGrooves: storedPresets.grooves,
