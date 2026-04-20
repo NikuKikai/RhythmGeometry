@@ -48,6 +48,11 @@ export interface ScheduledStep {
   position: number;
 }
 
+export interface IntervalContentBin {
+  interval: number;
+  count: number;
+}
+
 export const MIN_DIVISION = 1;
 export const MAX_DIVISION = 32;
 export const MIN_BPM = 40;
@@ -142,4 +147,63 @@ export function getStepPosition(noteIndex: number, division: number): number {
   }
 
   return noteIndex / division;
+}
+
+export function getAdjacentInteronsetIntervals(notes: number[], division: number): number[] {
+  const normalized = normalizeNotes(notes, division);
+  if (normalized.length === 0) {
+    return [];
+  }
+  if (normalized.length === 1) {
+    return [clampDivision(division)];
+  }
+
+  const nextDivision = clampDivision(division);
+  return normalized.map((note, index) => {
+    const nextNote = normalized[(index + 1) % normalized.length];
+    return nextNote > note ? nextNote - note : nextDivision - note + nextNote;
+  });
+}
+
+export function getRhythmicContours(intervals: number[]): string[] {
+  if (intervals.length === 0) {
+    return [];
+  }
+  if (intervals.length === 1) {
+    return ["="];
+  }
+
+  return intervals.map((interval, index) => {
+    const nextInterval = intervals[(index + 1) % intervals.length];
+    if (nextInterval > interval) {
+      return "+";
+    }
+    if (nextInterval < interval) {
+      return "-";
+    }
+    return "=";
+  });
+}
+
+export function getFullIntervalContent(notes: number[], division: number): IntervalContentBin[] {
+  const nextDivision = clampDivision(division);
+  const normalized = normalizeNotes(notes, nextDivision);
+  const maxInterval = Math.floor(nextDivision / 2);
+  const counts = new Map<number, number>();
+
+  for (let interval = 1; interval <= maxInterval; interval += 1) {
+    counts.set(interval, 0);
+  }
+
+  normalized.forEach((note, index) => {
+    normalized.slice(index + 1).forEach((otherNote) => {
+      const distance = Math.abs(otherNote - note);
+      const interval = Math.min(distance, nextDivision - distance);
+      if (interval > 0) {
+        counts.set(interval, (counts.get(interval) ?? 0) + 1);
+      }
+    });
+  });
+
+  return Array.from(counts, ([interval, count]) => ({ interval, count }));
 }

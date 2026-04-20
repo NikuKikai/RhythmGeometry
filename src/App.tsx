@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as Tone from "tone";
-import { FuturePanel } from "./components/FuturePanel";
+import { Inspector } from "./components/Inspector";
 import { RadialSequencer } from "./components/RadialSequencer";
 import { Sidebar } from "./components/Sidebar";
 import { Timeline } from "./components/Timeline";
@@ -197,7 +197,7 @@ export default function App() {
           <RadialSequencer />
         </div>
 
-        <FuturePanel />
+        <Inspector />
       </div>
 
       <Timeline />

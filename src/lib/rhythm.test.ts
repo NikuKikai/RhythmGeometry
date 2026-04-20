@@ -3,6 +3,9 @@ import {
   applyPresetToRing,
   changeRingDivision,
   changeRingVoice,
+  getAdjacentInteronsetIntervals,
+  getFullIntervalContent,
+  getRhythmicContours,
   getScheduledSteps,
   normalizeNotes,
   type Preset,
@@ -74,6 +77,25 @@ describe("rhythm helpers", () => {
     expect(getScheduledSteps([{ ...ring, division: 4, notes: [0, 1], phaseOffset: 0.5 }]).map((step) => step.position)).toEqual([
       0.125,
       0.375,
+    ]);
+  });
+
+  it("computes cyclic adjacent interonset intervals", () => {
+    expect(getAdjacentInteronsetIntervals([0, 3, 7], 12)).toEqual([3, 4, 5]);
+  });
+
+  it("computes rhythmic contours from adjacent intervals", () => {
+    expect(getRhythmicContours([3, 4, 4, 2])).toEqual(["+", "=", "-", "+"]);
+  });
+
+  it("computes full interval content as cyclic interval classes", () => {
+    expect(getFullIntervalContent([0, 3, 7], 12)).toEqual([
+      { interval: 1, count: 0 },
+      { interval: 2, count: 0 },
+      { interval: 3, count: 1 },
+      { interval: 4, count: 1 },
+      { interval: 5, count: 1 },
+      { interval: 6, count: 0 },
     ]);
   });
 });
