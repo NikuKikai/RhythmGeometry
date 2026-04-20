@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import * as Tone from "tone";
 import { Inspector } from "./components/Inspector";
 import { RadialSequencer } from "./components/RadialSequencer";
@@ -39,12 +39,13 @@ export default function App() {
   const playbackRef = useRef<PlaybackClock | null>(null);
   const ringsRef = useRef<Ring[]>(rings);
   const bpmRef = useRef(bpm);
+  const cyclePositionRef = useRef(cyclePosition);
 
-  function getCycleDuration(): number {
+  const getCycleDuration = useCallback((): number => {
     return (60 / bpmRef.current) * 4;
-  }
+  }, []);
 
-  function runAudioTick(): void {
+  const runAudioTick = useCallback((): void => {
     const playback = playbackRef.current;
     const handle = drumKitRef.current;
     if (!playback || !handle) {
@@ -74,9 +75,9 @@ export default function App() {
     });
 
     playback.lastAbsolutePosition = to;
-  }
+  }, [getCycleDuration]);
 
-  function stopRealtimePlayback(): void {
+  const stopRealtimePlayback = useCallback((): void => {
     const playback = playbackRef.current;
     if (playback && playback.intervalId !== null) {
       window.clearInterval(playback.intervalId);
@@ -86,9 +87,9 @@ export default function App() {
     if (drumKitRef.current) {
       setMasterMuted(drumKitRef.current, true);
     }
-  }
+  }, []);
 
-  function startRealtimePlayback(startPosition: number): void {
+  const startRealtimePlayback = useCallback((startPosition: number): void => {
     const handle = drumKitRef.current;
     if (!handle) {
       return;
@@ -106,7 +107,7 @@ export default function App() {
     };
 
     runAudioTick();
-  }
+  }, [getCycleDuration, runAudioTick, stopRealtimePlayback]);
 
   useEffect(() => {
     void hydrate();
@@ -121,11 +122,15 @@ export default function App() {
       drumKitRef.current?.dispose();
       drumKitRef.current = null;
     };
-  }, []);
+  }, [stopRealtimePlayback]);
 
   useEffect(() => {
     ringsRef.current = rings;
   }, [rings]);
+
+  useEffect(() => {
+    cyclePositionRef.current = cyclePosition;
+  }, [cyclePosition]);
 
   useEffect(() => {
     const playback = playbackRef.current;
@@ -149,11 +154,11 @@ export default function App() {
 
   useEffect(() => {
     if (isPlaying) {
-      startRealtimePlayback(cyclePosition);
+      startRealtimePlayback(cyclePositionRef.current);
     } else {
       stopRealtimePlayback();
     }
-  }, [isPlaying]);
+  }, [isPlaying, startRealtimePlayback, stopRealtimePlayback]);
 
   useEffect(() => {
     if (!isPlaying) {
@@ -178,7 +183,7 @@ export default function App() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [isPlaying, bpm, setCyclePosition]);
+  }, [isPlaying, bpm, getCycleDuration, setCyclePosition]);
 
   if (!settingsLoaded) {
     return (

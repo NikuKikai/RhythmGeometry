@@ -223,6 +223,13 @@ export function RadialSequencer() {
     return segments.filter((segment) => segment.toRadius > segment.fromRadius);
   }, [rings.length]);
 
+  function clearRotateTimer() {
+    if (rotateTimerRef.current !== null) {
+      window.clearTimeout(rotateTimerRef.current);
+      rotateTimerRef.current = null;
+    }
+  }
+
   useEffect(() => () => {
     if (dragFrameRef.current !== null) {
       window.cancelAnimationFrame(dragFrameRef.current);
@@ -255,13 +262,6 @@ export function RadialSequencer() {
         ...current,
         isRotating: true,
       });
-    }
-  }
-
-  function clearRotateTimer() {
-    if (rotateTimerRef.current !== null) {
-      window.clearTimeout(rotateTimerRef.current);
-      rotateTimerRef.current = null;
     }
   }
 
