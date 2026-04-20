@@ -180,6 +180,49 @@ input[type="range"] {
   accent-color: var(--accent);
 }
 
+.steps-delta-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 16px;
+  background: transparent;
+}
+
+.steps-delta-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 0;
+  background: rgba(244, 234, 220, 0.16);
+}
+
+.steps-delta-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: 1px solid rgba(23, 20, 17, 0.8);
+  border-radius: 50%;
+  background: var(--cream);
+}
+
+.steps-delta-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 0;
+  background: rgba(244, 234, 220, 0.16);
+}
+
+.steps-delta-slider::-moz-range-progress {
+  height: 4px;
+  background: transparent;
+}
+
+.steps-delta-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(23, 20, 17, 0.8);
+  border-radius: 50%;
+  background: var(--cream);
+}
+
 .preset-tabs {
   display: flex;
   flex-wrap: wrap;

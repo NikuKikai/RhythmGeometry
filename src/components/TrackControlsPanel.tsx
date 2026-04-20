@@ -1,11 +1,18 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import * as Tone from "tone";
 import type { DrumVoice } from "../lib/rhythm";
-import { DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
+import { clampDivision, DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
 import { colorRings, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
 import { ChevronDownIcon, DeleteIcon } from "./Icons";
 
 const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
+const MAX_STEP_DELTA = 4;
+
+interface StepDeltaDrag {
+  ringId: string;
+  originDivision: number;
+  delta: number;
+}
 
 export function TrackControlsPanel() {
   const rawRings = useRhythmStore((state) => state.rings);
@@ -23,11 +30,31 @@ export function TrackControlsPanel() {
   const deleteRing = useRhythmStore((state) => state.deleteRing);
   const selectRing = useRhythmStore((state) => state.selectRing);
   const togglePlayback = useRhythmStore((state) => state.togglePlayback);
+  const [stepDeltaDrag, setStepDeltaDrag] = useState<StepDeltaDrag | null>(null);
   const rings = useMemo(() => colorRings(rawRings), [rawRings]);
 
   async function handleTogglePlayback() {
     await Tone.start();
     togglePlayback();
+  }
+
+  function startStepDeltaDrag(ringId: string, originDivision: number) {
+    setStepDeltaDrag({ ringId, originDivision, delta: 0 });
+  }
+
+  function changeStepDelta(ringId: string, currentDivision: number, delta: number) {
+    const activeDrag =
+      stepDeltaDrag?.ringId === ringId
+        ? stepDeltaDrag
+        : { ringId, originDivision: currentDivision, delta: 0 };
+    const nextDelta = Math.round(delta);
+
+    setStepDeltaDrag({ ...activeDrag, delta: nextDelta });
+    changeRingDivision(ringId, clampDivision(activeDrag.originDivision + nextDelta));
+  }
+
+  function endStepDeltaDrag() {
+    setStepDeltaDrag(null);
   }
 
   return (
@@ -119,6 +146,20 @@ export function TrackControlsPanel() {
                 max={MAX_DIVISION}
                 value={ring.division}
                 onChange={(event) => changeRingDivision(ring.id, Number(event.target.value))}
+              />
+              <input
+                className="steps-delta-slider"
+                type="range"
+                min={-MAX_STEP_DELTA}
+                max={MAX_STEP_DELTA}
+                step="1"
+                value={stepDeltaDrag?.ringId === ring.id ? stepDeltaDrag.delta : 0}
+                onPointerDown={() => startStepDeltaDrag(ring.id, ring.division)}
+                onChange={(event) => changeStepDelta(ring.id, ring.division, Number(event.target.value))}
+                onPointerUp={endStepDeltaDrag}
+                onPointerCancel={endStepDeltaDrag}
+                onBlur={endStepDeltaDrag}
+                title={`${ring.label} steps delta`}
               />
             </div>
 
