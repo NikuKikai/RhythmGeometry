@@ -9,7 +9,6 @@ export const RING_TEMPLATES: Ring[] = [
     phaseOffset: 0,
     voice: "kick",
     volume: 0.9,
-    color: "#ff6b35",
   },
   {
     id: "snare",
@@ -19,7 +18,6 @@ export const RING_TEMPLATES: Ring[] = [
     phaseOffset: 0,
     voice: "snare",
     volume: 0.72,
-    color: "#f7c948",
   },
   {
     id: "closed-hat",
@@ -29,7 +27,6 @@ export const RING_TEMPLATES: Ring[] = [
     phaseOffset: 0,
     voice: "closedHat",
     volume: 0.42,
-    color: "#6ee7b7",
   },
   {
     id: "open-hat",
@@ -39,7 +36,6 @@ export const RING_TEMPLATES: Ring[] = [
     phaseOffset: 0,
     voice: "openHat",
     volume: 0.38,
-    color: "#60a5fa",
   },
   {
     id: "tom",
@@ -49,7 +45,6 @@ export const RING_TEMPLATES: Ring[] = [
     phaseOffset: 0,
     voice: "tom",
     volume: 0.52,
-    color: "#f472b6",
   },
 ];
 

@@ -8,7 +8,7 @@ import {
   triggerDrum,
   type DrumEngine,
 } from "../lib/audio";
-import type { Ring } from "../lib/rhythm";
+import { getNoteLevel, getPlaybackNoteLevel, type Ring } from "../lib/rhythm";
 import { useRhythmStore } from "../store/rhythmStore";
 
 const SCHEDULER_INTERVAL_MS = 5;
@@ -62,7 +62,12 @@ export function useDrumPlaybackEngine(): void {
           const eventPosition = cycle + notePosition;
           if (eventPosition > from && eventPosition <= to) {
             const eventTime = playback.startedAt + eventPosition * cycleDuration;
-            triggerDrum(engine.kit, ring.voice, Math.max(eventTime, now), ring.volume);
+            triggerDrum(
+              engine.kit,
+              ring.voice,
+              Math.max(eventTime, now),
+              ring.volume * getPlaybackNoteLevel(getNoteLevel(ring.noteLevels, note)),
+            );
           }
         }
       });

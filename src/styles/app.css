@@ -683,15 +683,29 @@ input[type="range"] {
   pointer-events: none;
 }
 
-.note-dot {
-  fill: color-mix(in srgb, var(--ring-color) 72%, var(--panel));
-  stroke: var(--black);
-  stroke-width: 1.4;
-  pointer-events: none;
-  transition: fill 90ms ease-out;
+.note-hit-area {
+  fill: transparent;
+  pointer-events: all;
 }
 
-.note-dot.triggered {
+.note-dot-base {
+  fill: #2a241d;
+  stroke: var(--black);
+  stroke-width: 1.2;
+  pointer-events: none;
+}
+
+.note-dot-fill {
+  fill: color-mix(in srgb, var(--ring-color) 72%, var(--panel));
+  stroke: var(--black);
+  stroke-width: 1.1;
+  pointer-events: none;
+  transition:
+    fill 90ms ease-out,
+    r 90ms ease-out;
+}
+
+.note-dot-fill.triggered {
   fill: var(--cream);
 }
 

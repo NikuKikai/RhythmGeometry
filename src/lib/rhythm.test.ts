@@ -3,11 +3,15 @@ import {
   applyPresetToRing,
   changeRingDivision,
   changeRingVoice,
+  getNoteLevel,
+  getPlaybackNoteLevel,
   getAdjacentInteronsetIntervals,
   getFullIntervalContent,
   getRhythmicContours,
   getScheduledSteps,
   normalizeNotes,
+  setNoteLevel,
+  toggleNoteLevel,
   type Preset,
   type Ring,
 } from "./rhythm";
@@ -20,7 +24,6 @@ const ring: Ring = {
   phaseOffset: 0,
   voice: "kick",
   volume: 0.8,
-  color: "#ff6b35",
 };
 
 describe("rhythm helpers", () => {
@@ -97,6 +100,21 @@ describe("rhythm helpers", () => {
       { interval: 5, count: 1 },
       { interval: 6, count: 0 },
     ]);
+  });
+
+  it("defaults note levels to full velocity and clamps updates", () => {
+    expect(getNoteLevel(undefined, 4)).toBe(1);
+    expect(setNoteLevel(undefined, [4], 4, 0.02, 16)).toEqual({ 4: 0.1 });
+  });
+
+  it("maps note levels to a smoother playback curve", () => {
+    expect(getPlaybackNoteLevel(0.1)).toBeCloseTo(0.35);
+    expect(getPlaybackNoteLevel(1)).toBeCloseTo(1);
+  });
+
+  it("adds and removes note levels together with note toggles", () => {
+    expect(toggleNoteLevel(undefined, [0, 4], 8, 16)).toEqual({ 0: 1, 4: 1, 8: 1 });
+    expect(toggleNoteLevel({ 0: 0.4, 4: 0.8 }, [0, 4], 4, 16)).toEqual({ 0: 0.4 });
   });
 });
 

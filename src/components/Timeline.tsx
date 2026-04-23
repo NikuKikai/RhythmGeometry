@@ -1,15 +1,13 @@
-import { useMemo } from "react";
-import { colorRings, useRhythmStore } from "../store/rhythmStore";
+import { useRhythmStore, getTrackColor } from "../store/rhythmStore";
 
 export function Timeline() {
-  const rawRings = useRhythmStore((state) => state.rings);
+  const rings = useRhythmStore((state) => state.rings);
   const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
-  const rings = useMemo(() => colorRings(rawRings), [rawRings]);
 
   return (
     <div className="timeline" aria-label="Shared cycle timeline">
       <div className="timeline-track" style={{ "--track-count": rings.length } as React.CSSProperties}>
-        {rings.map((ring) => (
+        {rings.map((ring, ringIndex) => (
           <div className="timeline-row" key={ring.id} >
             {Array.from({ length: ring.division }, (_, index) => {
               const position = ((index + ring.phaseOffset) / ring.division) % 1;
@@ -29,7 +27,7 @@ export function Timeline() {
                 className="timeline-note"
                 style={{
                   left: `${(((note + ring.phaseOffset) / ring.division) % 1) * 100}%`,
-                  background: ring.color,
+                  background: getTrackColor(ringIndex),
                 }}
               />
             ))}

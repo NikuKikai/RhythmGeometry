@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import * as Tone from "tone";
 import type { DrumVoice } from "../lib/rhythm";
 import { clampDivision, DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
-import { colorRings, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
+import { getTrackColor, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
 import { ChevronDownIcon, DeleteIcon } from "./Icons";
 
 const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
@@ -15,7 +15,7 @@ interface StepDeltaDrag {
 }
 
 export function TrackControlsPanel() {
-  const rawRings = useRhythmStore((state) => state.rings);
+  const rings = useRhythmStore((state) => state.rings);
   const selectedRingId = useRhythmStore((state) => state.selectedRingId);
   const bpm = useRhythmStore((state) => state.transport.bpm);
   const masterVolume = useRhythmStore((state) => state.transport.masterVolume);
@@ -31,7 +31,6 @@ export function TrackControlsPanel() {
   const selectRing = useRhythmStore((state) => state.selectRing);
   const togglePlayback = useRhythmStore((state) => state.togglePlayback);
   const [stepDeltaDrag, setStepDeltaDrag] = useState<StepDeltaDrag | null>(null);
-  const rings = useMemo(() => colorRings(rawRings), [rawRings]);
 
   async function handleTogglePlayback() {
     await Tone.start();
@@ -97,14 +96,14 @@ export function TrackControlsPanel() {
 
       <p className="tracks-label">Tracks</p>
       <div className="ring-controls">
-        {rings.map((ring) => (
+        {rings.map((ring, ringIndex) => (
           <div
             key={ring.id}
             className={ring.id === selectedRingId ? "ring-control active" : "ring-control"}
           >
             <div className="ring-control-heading">
               <button type="button" onClick={() => selectRing(ring.id)} title={`Select ${ring.label}`}>
-                <span className="ring-swatch" style={{ background: ring.color }} />
+                <span className="ring-swatch" style={{ background: getTrackColor(ringIndex) }} />
                 <span className="ring-title">{voiceLabels.get(ring.voice) ?? ring.voice}</span>
               </button>
               <span className="voice-select-wrap">

@@ -7,7 +7,9 @@ import {
   changeRingVoice,
   clamp,
   clampBpm,
+  setNoteLevel,
   toggleNote,
+  toggleNoteLevel,
   USER_PRESET_CATEGORY,
   type DrumVoice,
   type GroovePreset,
@@ -34,6 +36,10 @@ export const TRACK_COLORS = [
   "#f472b6",
 ];
 
+export function getTrackColor(index: number): string {
+  return TRACK_COLORS[index % TRACK_COLORS.length];
+}
+
 const INITIAL_TRANSPORT: TransportState = {
   bpm: 112,
   masterVolume: 0.82,
@@ -57,6 +63,7 @@ interface RhythmState {
   setPresetPanelState: (panelState: Partial<StoredPresetPanelState>) => void;
   selectRing: (ringId: string) => void;
   toggleNote: (ringId: string, noteIndex: number) => void;
+  setNoteLevel: (ringId: string, noteIndex: number, level: number) => void;
   changeRingDivision: (ringId: string, division: number) => void;
   changeRingPhaseOffset: (ringId: string, phaseOffset: number) => void;
   changeRingVolume: (ringId: string, volume: number) => void;
@@ -71,13 +78,6 @@ interface RhythmState {
   deleteTrackPreset: (presetId: string) => void;
 }
 
-export function colorRings(rings: Ring[]): Ring[] {
-  return rings.map((ring, index) => ({
-    ...ring,
-    color: TRACK_COLORS[index % TRACK_COLORS.length],
-  }));
-}
-
 function createRingsFromGroove(groove: GroovePreset): Ring[] {
   const createdAt = Date.now();
   return groove.rings.slice(0, MAX_TRACKS).map((ring, index) => ({
@@ -85,21 +85,18 @@ function createRingsFromGroove(groove: GroovePreset): Ring[] {
     phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
     id: `${groove.id}-${index}-${createdAt}`,
     label: `${ring.label} ${index + 1}`,
-    color: TRACK_COLORS[index % TRACK_COLORS.length],
   }));
 }
 
 function normalizeStoredRings(rings: Ring[]): Ring[] {
-  return colorRings(
-    rings.slice(0, MAX_TRACKS).map((ring) => {
-      const ringWithDivision = changeRingDivision(ring, ring.division);
-      return {
-        ...ringWithDivision,
-        phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
-        volume: clamp(ring.volume, 0, 1),
-      };
-    }),
-  );
+  return rings.slice(0, MAX_TRACKS).map((ring) => {
+    const ringWithDivision = changeRingDivision(ring, ring.division);
+    return {
+      ...ringWithDivision,
+      phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
+      volume: clamp(ring.volume, 0, 1),
+    };
+  });
 }
 
 function persistUserPresets(grooves: GroovePreset[], tracks: Preset[]): void {
@@ -252,7 +249,23 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
   toggleNote: (ringId, noteIndex) => {
     const nextRings = get().rings.map((ring) =>
       ring.id === ringId
-        ? { ...ring, notes: toggleNote(ring.notes, noteIndex, ring.division) }
+        ? {
+            ...ring,
+            notes: toggleNote(ring.notes, noteIndex, ring.division),
+            noteLevels: toggleNoteLevel(ring.noteLevels, ring.notes, noteIndex, ring.division),
+          }
+        : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
+  },
+
+  setNoteLevel: (ringId, noteIndex, level) => {
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId
+        ? {
+            ...ring,
+            noteLevels: setNoteLevel(ring.noteLevels, ring.notes, noteIndex, level, ring.division),
+          }
         : ring,
     );
     updateAndPersist(set, get, { rings: nextRings });
@@ -302,7 +315,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
     };
 
     updateAndPersist(set, get, {
-      rings: colorRings([...state.rings, nextRing]),
+      rings: [...state.rings, nextRing],
       selectedRingId: nextRing.id,
     });
   },
@@ -313,7 +326,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       return;
     }
 
-    const nextRings = colorRings(state.rings.filter((ring) => ring.id !== ringId));
+    const nextRings = state.rings.filter((ring) => ring.id !== ringId);
     updateAndPersist(set, get, {
       rings: nextRings,
       selectedRingId:
@@ -355,10 +368,11 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       id: `saved-groove-${savedAt}`,
       name,
       category: USER_PRESET_CATEGORY,
-      rings: state.rings.slice(0, MAX_TRACKS).map(({ label, division, notes, phaseOffset, voice, volume }) => ({
+      rings: state.rings.slice(0, MAX_TRACKS).map(({ label, division, notes, noteLevels, phaseOffset, voice, volume }) => ({
         label,
         division,
         notes,
+        noteLevels,
         phaseOffset,
         voice,
         volume,
@@ -382,6 +396,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       category: USER_PRESET_CATEGORY,
       division: selectedRing.division,
       notes: selectedRing.notes,
+      noteLevels: selectedRing.noteLevels,
       phaseOffset: selectedRing.phaseOffset,
     };
     const nextTrackPresets = [nextPreset, ...state.userTrackPresets];
