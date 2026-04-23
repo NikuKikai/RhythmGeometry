@@ -1,7 +1,12 @@
 import { memo, useEffect, useMemo, useRef, type PointerEvent } from "react";
 import { getNotePolygonPoints, getRingCellPath, polarToCartesian } from "../lib/geometry";
 import { clampNoteLevel, getNoteLevel, MAX_NOTE_LEVEL, MIN_NOTE_LEVEL, type Ring } from "../lib/rhythm";
-import { getTrackColor, useRhythmStore } from "../store/rhythmStore";
+import {
+  getCycleBucketIndex,
+  getTrackColor,
+  INACTIVE_CYCLE_BUCKET,
+  useRhythmStore,
+} from "../store/rhythmStore";
 import { useSequencerUiStore } from "../store/sequencerUiStore";
 
 const SIZE = 620;
@@ -206,13 +211,20 @@ const NoteDot = memo(function NoteDot({
       ? state.noteDragState
       : null,
   );
-  const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
   const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
   const phaseOffset = ringDragState?.isRotating ? ringDragState.previewOffset : ring.phaseOffset;
   const point = polarToCartesian(CENTER, noteRadius, (note + phaseOffset) / ring.division);
   const notePosition = ((note + phaseOffset) / ring.division) % 1;
-  const elapsedSinceTrigger = (cyclePosition - notePosition + 1) % 1;
-  const isTriggered = isPlaying && elapsedSinceTrigger < NOTE_FLASH_WINDOW;
+  const cycleBucketIndex = getCycleBucketIndex(notePosition);
+  const cycleBucketPosition = useRhythmStore(
+    (state) => state.transport.cycleBuckets[cycleBucketIndex] ?? INACTIVE_CYCLE_BUCKET,
+  );
+  const elapsedSinceTrigger =
+    cycleBucketPosition === INACTIVE_CYCLE_BUCKET ? 1 : (cycleBucketPosition - notePosition + 1) % 1;
+  const isTriggered =
+    isPlaying &&
+    cycleBucketPosition !== INACTIVE_CYCLE_BUCKET &&
+    elapsedSinceTrigger < NOTE_FLASH_WINDOW;
   const level = draggedNote?.previewLevel ?? getNoteLevel(ring.noteLevels, note);
 
   return (

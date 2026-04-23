@@ -44,6 +44,7 @@ export interface TransportState {
   masterVolume: number;
   isPlaying: boolean;
   cyclePosition: number;
+  cycleBuckets: number[];
 }
 
 export interface ScheduledStep {

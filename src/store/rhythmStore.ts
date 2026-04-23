@@ -35,9 +35,19 @@ export const TRACK_COLORS = [
   "#60a5fa",
   "#f472b6",
 ];
+export const CYCLE_BUCKET_COUNT = 16;
+export const INACTIVE_CYCLE_BUCKET = -1;
 
 export function getTrackColor(index: number): string {
   return TRACK_COLORS[index % TRACK_COLORS.length];
+}
+
+export function createCycleBuckets(): number[] {
+  return Array.from({ length: CYCLE_BUCKET_COUNT }, () => INACTIVE_CYCLE_BUCKET);
+}
+
+export function getCycleBucketIndex(position: number): number {
+  return ((Math.round(position * CYCLE_BUCKET_COUNT) % CYCLE_BUCKET_COUNT) + CYCLE_BUCKET_COUNT) % CYCLE_BUCKET_COUNT;
 }
 
 const INITIAL_TRANSPORT: TransportState = {
@@ -45,6 +55,7 @@ const INITIAL_TRANSPORT: TransportState = {
   masterVolume: 0.82,
   isPlaying: false,
   cyclePosition: 0,
+  cycleBuckets: createCycleBuckets(),
 };
 
 interface RhythmState {
@@ -191,10 +202,16 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
   },
 
   setCyclePosition: (cyclePosition) => {
+    const nextActiveBucket = getCycleBucketIndex(cyclePosition);
     set((state) => ({
       transport: {
         ...state.transport,
         cyclePosition,
+        cycleBuckets: (() => {
+          const nextBuckets = createCycleBuckets();
+          nextBuckets[nextActiveBucket] = cyclePosition;
+          return nextBuckets;
+        })(),
       },
     }));
   },
