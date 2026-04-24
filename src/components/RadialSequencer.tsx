@@ -1,35 +1,25 @@
 import { memo, useEffect, useMemo, useRef, type PointerEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { getNotePolygonPoints, getRingCellPath, polarToCartesian } from "../lib/geometry";
-import { clampNoteLevel, getNoteLevel, MAX_NOTE_LEVEL, MIN_NOTE_LEVEL } from "../lib/rhythm";
-import {
-  getCycleBucketIndex,
-  getTrackColor,
-  INACTIVE_CYCLE_BUCKET,
-  useRhythmStore,
-} from "../store/rhythmStore";
+import { useRhythmStore } from "../store/rhythmStore";
 import { useSequencerUiStore } from "../store/sequencerUiStore";
-
-const SIZE = 620;
-const CENTER = { x: SIZE / 2, y: SIZE / 2 };
-const OUTER_RADIUS = 270;
-const RING_WIDTH = 38;
-const RING_GAP = 12;
-const NOTE_FLASH_WINDOW = 0.035;
-const DRAG_THRESHOLD = 0.006;
-const LONG_PRESS_ROTATE_MS = 500;
-const OFFSET_GUIDE_WIDTH = 4;
-
-interface RadialLineSegment {
-  fromRadius: number;
-  toRadius: number;
-}
-
-interface RingPointerData {
-  ringId: string;
-  phaseOffset: number;
-  noteLevels?: Partial<Record<number, number>>;
-}
+import { PlayheadLine } from "./radial-sequencer/PlayheadLine";
+import { RadialRingNotes } from "./radial-sequencer/RadialRingNotes";
+import { RadialRingShell } from "./radial-sequencer/RadialRingShell";
+import {
+  CENTER,
+  DRAG_THRESHOLD,
+  LONG_PRESS_ROTATE_MS,
+  OFFSET_GUIDE_WIDTH,
+  OUTER_RADIUS,
+  RING_GAP,
+  RING_WIDTH,
+  SIZE,
+  getPointerCyclePosition,
+  type RadialLineSegment,
+  type RingPointerData,
+} from "./radial-sequencer/shared";
+import { polarToCartesian } from "../lib/geometry";
+import { clampNoteLevel, getNoteLevel, MAX_NOTE_LEVEL, MIN_NOTE_LEVEL } from "../lib/rhythm";
 
 interface RadialRingProps {
   ringId: string;
@@ -43,283 +33,6 @@ interface RadialRingProps {
     noteIndex: number,
   ) => void;
 }
-
-interface RadialRingShellProps {
-  ringId: string;
-  ringIndex: number;
-  onCellPointerDown: (event: PointerEvent<SVGPathElement>, ring: RingPointerData) => void;
-  onCellClick: (ringId: string, stepIndex: number) => void;
-  onCellKeyDown: (event: React.KeyboardEvent<SVGPathElement>, ringId: string, stepIndex: number) => void;
-}
-
-interface RadialRingNotesProps {
-  ringId: string;
-  ringIndex: number;
-  onNotePointerDown: (
-    event: PointerEvent<SVGCircleElement>,
-    ring: RingPointerData,
-    noteIndex: number,
-  ) => void;
-}
-
-interface NoteDotProps {
-  ringId: string;
-  ringIndex: number;
-  note: number;
-  noteRadius: number;
-  dotRadius: number;
-  onNotePointerDown: (
-    event: PointerEvent<SVGCircleElement>,
-    ring: RingPointerData,
-    noteIndex: number,
-  ) => void;
-}
-
-function getPointerCyclePosition(clientX: number, clientY: number, svg: SVGSVGElement): number {
-  const rect = svg.getBoundingClientRect();
-  const x = ((clientX - rect.left) / rect.width) * SIZE;
-  const y = ((clientY - rect.top) / rect.height) * SIZE;
-  const angle = Math.atan2(y - CENTER.y, x - CENTER.x) + Math.PI / 2;
-  return ((angle / (Math.PI * 2)) % 1 + 1) % 1;
-}
-
-function getOffsetArcPath(radius: number, division: number, phaseOffset: number): string {
-  if (phaseOffset <= 0) {
-    return "";
-  }
-
-  const endPosition = phaseOffset / division;
-  const start = polarToCartesian(CENTER, radius, 0);
-  const end = polarToCartesian(CENTER, radius, endPosition);
-  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 1 ${end.x} ${end.y}`;
-}
-
-const RadialRingShell = memo(function RadialRingShell({
-  ringId,
-  ringIndex,
-  onCellPointerDown,
-  onCellClick,
-  onCellKeyDown,
-}: RadialRingShellProps) {
-  const ring = useRhythmStore((state) => state.rings[ringIndex]);
-  const ringDragState = useSequencerUiStore((state) =>
-    state.ringDragState?.ringId === ringId ? state.ringDragState : null,
-  );
-
-  if (!ring || ring.id !== ringId) {
-    return null;
-  }
-
-  const outerRadius = OUTER_RADIUS - ringIndex * (RING_WIDTH + RING_GAP);
-  const innerRadius = outerRadius - RING_WIDTH;
-  const noteRadius = innerRadius + RING_WIDTH / 2;
-  const phaseOffset = ringDragState?.isRotating ? ringDragState.previewOffset : ring.phaseOffset;
-  const isRotating = ringDragState?.isRotating ?? false;
-  const polygonPoints = getNotePolygonPoints(
-    ring.notes,
-    ring.division,
-    CENTER,
-    noteRadius,
-    phaseOffset,
-  );
-  const offsetArcRadius = outerRadius + OFFSET_GUIDE_WIDTH / 2;
-  const offsetLabelPoint = polarToCartesian(CENTER, offsetArcRadius, 0);
-  const maxOffsetMarkerPosition = 1 / ring.division;
-  const maxOffsetMarkerStart = polarToCartesian(
-    CENTER,
-    offsetArcRadius - OFFSET_GUIDE_WIDTH / 2,
-    maxOffsetMarkerPosition,
-  );
-  const maxOffsetMarkerEnd = polarToCartesian(
-    CENTER,
-    offsetArcRadius + OFFSET_GUIDE_WIDTH / 2,
-    maxOffsetMarkerPosition,
-  );
-  const offsetArcPath = getOffsetArcPath(offsetArcRadius, ring.division, phaseOffset);
-  const ringColor = getTrackColor(ringIndex);
-
-  return (
-    <g>
-      {isRotating && (
-        <>
-          {offsetArcPath && <path className="ring-offset-arc" d={offsetArcPath} />}
-          <line
-            className="ring-offset-limit"
-            x1={maxOffsetMarkerStart.x}
-            y1={maxOffsetMarkerStart.y}
-            x2={maxOffsetMarkerEnd.x}
-            y2={maxOffsetMarkerEnd.y}
-          />
-          <text
-            className="ring-offset-label"
-            x={offsetLabelPoint.x + 4}
-            y={offsetLabelPoint.y - 7}
-            textAnchor="start"
-          >
-            {phaseOffset.toFixed(3)}
-          </text>
-        </>
-      )}
-
-      {Array.from({ length: ring.division }, (_, stepIndex) => {
-        const active = ring.notes.includes(stepIndex);
-        return (
-          <path
-            key={stepIndex}
-            d={getRingCellPath({
-              center: CENTER,
-              innerRadius,
-              outerRadius,
-              stepIndex,
-              division: ring.division,
-              phaseOffset,
-              gapRadians: 0,
-            })}
-            className={active ? "ring-cell active" : "ring-cell"}
-            style={{
-              "--ring-color": ringColor,
-            } as React.CSSProperties}
-            onPointerDown={(event) =>
-              onCellPointerDown(event, {
-                ringId: ring.id,
-                phaseOffset: ring.phaseOffset,
-                noteLevels: ring.noteLevels,
-              })}
-            onClick={() => onCellClick(ring.id, stepIndex)}
-            aria-label={`${ring.label} step ${stepIndex + 1}`}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => onCellKeyDown(event, ring.id, stepIndex)}
-          />
-        );
-      })}
-
-      {ring.notes.length > 1 && (
-        <polygon
-          className="note-polygon"
-          points={polygonPoints}
-          style={{
-            "--ring-color": ringColor,
-          } as React.CSSProperties}
-        />
-      )}
-    </g>
-  );
-}, (previous, next) =>
-  previous.ringId === next.ringId &&
-  previous.ringIndex === next.ringIndex,
-);
-
-const NoteDot = memo(function NoteDot({
-  ringId,
-  ringIndex,
-  note,
-  noteRadius,
-  dotRadius,
-  onNotePointerDown,
-}: NoteDotProps) {
-  const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
-  const ring = useRhythmStore((state) => state.rings[ringIndex]);
-  const ringDragState = useSequencerUiStore((state) =>
-    state.ringDragState?.ringId === ringId ? state.ringDragState : null,
-  );
-  const draggedNote = useSequencerUiStore((state) =>
-    state.noteDragState?.ringId === ringId && state.noteDragState.noteIndex === note
-      ? state.noteDragState
-      : null,
-  );
-
-  const phaseOffset = ringDragState?.isRotating ? ringDragState.previewOffset : ring.phaseOffset;
-  const notePosition = ((note + phaseOffset) / ring.division) % 1;
-  const cycleBucketIndex = getCycleBucketIndex(notePosition);
-  const cycleBucketPosition = useRhythmStore(
-    (state) => state.transport.cycleBuckets[cycleBucketIndex] ?? INACTIVE_CYCLE_BUCKET,
-  );
-
-  if (!ring || ring.id !== ringId) {
-    return null;
-  }
-
-  const elapsedSinceTrigger =
-    cycleBucketPosition === INACTIVE_CYCLE_BUCKET ? 1 : (cycleBucketPosition - notePosition + 1) % 1;
-  const isTriggered =
-    isPlaying &&
-    cycleBucketPosition !== INACTIVE_CYCLE_BUCKET &&
-    elapsedSinceTrigger < NOTE_FLASH_WINDOW;
-  const level = draggedNote?.previewLevel ?? getNoteLevel(ring.noteLevels, note);
-  const point = polarToCartesian(CENTER, noteRadius, (note + phaseOffset) / ring.division);
-  const ringColor = getTrackColor(ringIndex);
-
-  return (
-    <g>
-      <circle className="note-dot-base" cx={point.x} cy={point.y} r={dotRadius} />
-      <circle
-        className={isTriggered ? "note-dot-fill triggered" : "note-dot-fill"}
-        cx={point.x}
-        cy={point.y}
-        r={dotRadius * level}
-        style={{
-          "--ring-color": ringColor,
-        } as React.CSSProperties}
-      />
-      <circle
-        className="note-hit-area"
-        cx={point.x}
-        cy={point.y}
-        r={dotRadius}
-        onPointerDown={(event) =>
-          onNotePointerDown(event, {
-            ringId: ring.id,
-            phaseOffset: ring.phaseOffset,
-            noteLevels: ring.noteLevels,
-          }, note)}
-      />
-    </g>
-  );
-}, (previous, next) =>
-  previous.ringId === next.ringId &&
-  previous.ringIndex === next.ringIndex &&
-  previous.note === next.note &&
-  previous.noteRadius === next.noteRadius &&
-  previous.dotRadius === next.dotRadius,
-);
-
-const RadialRingNotes = memo(function RadialRingNotes({
-  ringId,
-  ringIndex,
-  onNotePointerDown,
-}: RadialRingNotesProps) {
-  const notes = useRhythmStore((state) => state.rings[ringIndex]?.notes);
-  const isSelected = useRhythmStore((state) => state.selectedRingId === ringId);
-
-  if (!notes) {
-    return null;
-  }
-
-  const outerRadius = OUTER_RADIUS - ringIndex * (RING_WIDTH + RING_GAP);
-  const innerRadius = outerRadius - RING_WIDTH;
-  const noteRadius = innerRadius + RING_WIDTH / 2;
-  const dotRadius = isSelected ? 7 : 5;
-
-  return (
-    <>
-      {notes.map((note) => (
-        <NoteDot
-          key={note}
-          ringId={ringId}
-          ringIndex={ringIndex}
-          note={note}
-          noteRadius={noteRadius}
-          dotRadius={dotRadius}
-          onNotePointerDown={onNotePointerDown}
-        />
-      ))}
-    </>
-  );
-}, (previous, next) =>
-  previous.ringId === next.ringId &&
-  previous.ringIndex === next.ringIndex,
-);
 
 const RadialRing = memo(function RadialRing({
   ringId,
@@ -351,22 +64,6 @@ const RadialRing = memo(function RadialRing({
   previous.ringId === next.ringId &&
   previous.ringIndex === next.ringIndex,
 );
-
-const PlayheadLine = memo(function PlayheadLine() {
-  const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
-  const playheadStart = polarToCartesian(CENTER, OUTER_RADIUS + 8, cyclePosition);
-  const playheadEnd = polarToCartesian(CENTER, OUTER_RADIUS + 30, cyclePosition);
-
-  return (
-    <line
-      className="playhead-line"
-      x1={playheadStart.x}
-      y1={playheadStart.y}
-      x2={playheadEnd.x}
-      y2={playheadEnd.y}
-    />
-  );
-});
 
 export function RadialSequencer() {
   const ringIds = useRhythmStore(useShallow((state) => state.rings.map((ring) => ring.id)));

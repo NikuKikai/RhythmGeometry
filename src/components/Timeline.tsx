@@ -11,29 +11,19 @@ const TimelineRow = memo(function TimelineRow({
   ringId,
   ringIndex,
 }: TimelineRowProps) {
-  const ring = useRhythmStore(
-    useShallow((state) => {
-      const currentRing = state.rings.find((item) => item.id === ringId);
-      return currentRing
-        ? {
-            id: currentRing.id,
-            division: currentRing.division,
-            notes: currentRing.notes,
-            phaseOffset: currentRing.phaseOffset,
-          }
-        : null;
-    }),
-  );
+  const division = useRhythmStore((state) => state.rings[ringIndex]?.division);
+  const notes = useRhythmStore((state) => state.rings[ringIndex]?.notes);
+  const phaseOffset = useRhythmStore((state) => state.rings[ringIndex]?.phaseOffset);
 
-  if (!ring) {
+  if (!division || !notes || phaseOffset === undefined) {
     return null;
   }
 
   return (
-    <div className="timeline-row" key={ring.id} >
-      {Array.from({ length: ring.division }, (_, index) => {
-        const position = ((index + ring.phaseOffset) / ring.division) % 1;
-        const isStrong = index === 0 || index % Math.max(1, ring.division / 4) === 0;
+    <div className="timeline-row" key={ringId} >
+      {Array.from({ length: division }, (_, index) => {
+        const position = ((index + phaseOffset) / division) % 1;
+        const isStrong = index === 0 || index % Math.max(1, division / 4) === 0;
 
         return (
           <span
@@ -43,12 +33,12 @@ const TimelineRow = memo(function TimelineRow({
           />
         );
       })}
-      {ring.notes.map((note) => (
+      {notes.map((note) => (
         <span
           key={note}
           className="timeline-note"
           style={{
-            left: `${(((note + ring.phaseOffset) / ring.division) % 1) * 100}%`,
+            left: `${(((note + phaseOffset) / division) % 1) * 100}%`,
             background: getTrackColor(ringIndex),
           }}
         />
@@ -57,9 +47,15 @@ const TimelineRow = memo(function TimelineRow({
   );
 });
 
+function TimelinePlayhead() {
+  const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
+  return (
+    <span className="timeline-playhead" style={{ left: `${cyclePosition * 100}%` }} />
+  );
+}
+
 export function Timeline() {
   const ringIds = useRhythmStore(useShallow((state) => state.rings.map((ring) => ring.id)));
-  const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
 
   return (
     <div className="timeline" aria-label="Shared cycle timeline">
@@ -71,7 +67,7 @@ export function Timeline() {
             ringIndex={ringIndex}
           />
         ))}
-        <span className="timeline-playhead" style={{ left: `${cyclePosition * 100}%` }} />
+        <TimelinePlayhead />
       </div>
     </div>
   );

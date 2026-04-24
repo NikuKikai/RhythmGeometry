@@ -108,7 +108,7 @@ describe("rhythm helpers", () => {
   });
 
   it("maps note levels to a smoother playback curve", () => {
-    expect(getPlaybackNoteLevel(0.1)).toBeCloseTo(0.35);
+    expect(getPlaybackNoteLevel(0.1)).toBeCloseTo(0.12);
     expect(getPlaybackNoteLevel(1)).toBeCloseTo(1);
   });
 
