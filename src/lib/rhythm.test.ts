@@ -5,9 +5,6 @@ import {
   changeRingVoice,
   getNoteLevel,
   getPlaybackNoteLevel,
-  getAdjacentInteronsetIntervals,
-  getFullIntervalContent,
-  getRhythmicContours,
   getScheduledSteps,
   MIN_PLAYBACK_NOTE_LEVEL,
   normalizeNotes,
@@ -16,6 +13,13 @@ import {
   type Preset,
   type Ring,
 } from "./rhythm";
+import {
+  getAdjacentInteronsetIntervals,
+  getGttmAccentHierarchy,
+  getGttmSyncopation,
+  getFullIntervalContent,
+  getRhythmicContours,
+} from "./inspectorAnalysis";
 
 const ring: Ring = {
   id: "kick",
@@ -116,6 +120,22 @@ describe("rhythm helpers", () => {
   it("adds and removes note levels together with note toggles", () => {
     expect(toggleNoteLevel(undefined, [0, 4], 8, 16)).toEqual({ 0: 1, 4: 1, 8: 1 });
     expect(toggleNoteLevel({ 0: 0.4, 4: 0.8 }, [0, 4], 4, 16)).toEqual({ 0: 0.4 });
+  });
+
+  it("builds GTTM accent hierarchy and marks active notes", () => {
+    expect(getGttmAccentHierarchy([0, 4, 10], 16).slice(0, 6)).toEqual([
+      { step: 0, accent: 5, isNote: true },
+      { step: 1, accent: 1, isNote: false },
+      { step: 2, accent: 2, isNote: false },
+      { step: 3, accent: 1, isNote: false },
+      { step: 4, accent: 3, isNote: true },
+      { step: 5, accent: 1, isNote: false },
+    ]);
+  });
+
+  it("computes GTTM syncopation as normalized accent weakness", () => {
+    expect(getGttmSyncopation([0, 4, 8, 12], 16)).toBeCloseTo(0.3);
+    expect(getGttmSyncopation([1, 3, 5, 7], 16)).toBeCloseTo(0.8);
   });
 });
 

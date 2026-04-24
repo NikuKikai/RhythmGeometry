@@ -10,12 +10,27 @@
   align-content: start;
   gap: 10px;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .inspector-section {
   display: grid;
   gap: 4px;
+}
+
+.inspector-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inspector-label-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 .inspector-label {
@@ -25,6 +40,42 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.inspector-label-value {
+  color: var(--cream);
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.inspector-info-button {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(244, 234, 220, 0.28);
+  border-radius: 999px;
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.inspector-info-button:hover {
+  color: var(--cream);
+  border-color: rgba(255, 107, 53, 0.72);
+  background: rgba(255, 107, 53, 0.12);
+}
+
+.inspector-info-icon {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .inspector-value,
@@ -37,40 +88,43 @@
 }
 
 .inspector-sequence {
+  display: block;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
 }
 
 .inspector-histogram-section {
   min-height: 0;
 }
 
-.interval-histogram {
-  display: flex;
-  align-items: end;
-  gap: 5px;
-  min-height: 112px;
+.histogram {
+  --histogram-columns: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--histogram-columns), minmax(0, 1fr));
+  gap: 1px;
+  width: 100%;
+  min-height: 64px;
   padding-top: 4px;
+  overflow-x: hidden;
 }
 
-.interval-column {
-  display: grid;
-  grid-template-rows: 16px 72px 16px;
-  align-items: end;
-  justify-items: center;
-  gap: 3px;
-  flex: 1 1 0;
-  min-width: 14px;
+.histogram-column {
+  min-width: 0;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
 }
 
-.interval-index,
-.interval-count {
+.histogram-column span {
   text-align: center;
+  display: block;
+  margin: 2px 0;
 }
 
-.interval-bar-track {
+.histogram-bar-track {
   display: flex;
   align-items: end;
   width: 100%;
@@ -80,8 +134,58 @@
   overflow: hidden;
 }
 
-.interval-bar {
+.histogram-bar {
   width: 100%;
   min-width: 0;
   background: var(--accent);
+}
+
+.histogram-bar-note {
+  background: var(--accent);
+}
+
+.histogram-bar-muted {
+  background: rgba(244, 234, 220, 0.25);
+}
+
+.inspector-info-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.56);
+}
+
+.inspector-info-dialog {
+  width: min(320px, calc(100vw - 24px));
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+}
+
+.inspector-info-title {
+  margin: 0;
+  color: var(--cream);
+  font-size: 0.9rem;
+}
+
+.inspector-info-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.inspector-info-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.inspector-info-actions button {
+  border-radius: 5px;
+  padding: 5px 10px;
 }

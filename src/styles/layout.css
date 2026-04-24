@@ -39,7 +39,7 @@
 
 .workspace {
   display: grid;
-  grid-template-columns: 280px minmax(360px, 1fr) 220px;
+  grid-template-columns: 280px minmax(360px, 1fr) 250px;
   gap: 6px;
   min-height: 0;
   overflow: hidden;

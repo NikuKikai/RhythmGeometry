@@ -163,11 +163,21 @@
   padding: 0;
   opacity: 0;
   cursor: pointer;
+  color: var(--cream);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color-scheme: dark;
 }
 
 .voice-select option {
   color: var(--cream);
-  background: var(--panel-strong);
+  background: #1a2528;
+}
+
+.voice-select option:checked {
+  background: #243137;
 }
 
 .voice-select-icon {
