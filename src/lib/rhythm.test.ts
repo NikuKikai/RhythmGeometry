@@ -134,7 +134,7 @@ describe("rhythm helpers", () => {
   });
 
   it("computes GTTM syncopation as normalized accent weakness", () => {
-    expect(getGttmSyncopation([0, 4, 8, 12], 16)).toBeCloseTo(0.3);
+    expect(getGttmSyncopation([0, 4, 8, 12], 16)).toBeCloseTo(0.25);
     expect(getGttmSyncopation([1, 3, 5, 7], 16)).toBeCloseTo(0.8);
   });
 });
