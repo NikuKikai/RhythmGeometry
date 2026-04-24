@@ -36,10 +36,10 @@ function SavePresetDialog({ name, onChangeName, onCancel, onConfirm }: SavePrese
           />
         </label>
         <div className="preset-dialog-actions">
-          <button type="button" onClick={onCancel} title="Cancel saving preset">
+          <button className="preset-dialog-button ui-button" type="button" onClick={onCancel} title="Cancel saving preset">
             Cancel
           </button>
-          <button type="submit" title="Save preset">
+          <button className="preset-dialog-button ui-button" type="submit" title="Save preset">
             OK
           </button>
         </div>
@@ -192,7 +192,7 @@ export function PresetPanel() {
             ? visibleGrooves.map((preset) => (
                 <button
                   key={preset.id}
-                  className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
+                  className={preset.id === selectedPresetId ? "preset-button ui-button selected" : "preset-button ui-button"}
                   type="button"
                   title={`${preset.name}: click to select, double-click to apply`}
                   onClick={() => setPresetPanelState({ selectedPresetId: preset.id })}
@@ -205,7 +205,7 @@ export function PresetPanel() {
             : visiblePresets.map((preset) => (
                 <button
                   key={preset.id}
-                  className={preset.id === selectedPresetId ? "preset-button selected" : "preset-button"}
+                  className={preset.id === selectedPresetId ? "preset-button ui-button selected" : "preset-button ui-button"}
                   type="button"
                   title={`${preset.name}: click to select, double-click to apply`}
                   onClick={() => setPresetPanelState({ selectedPresetId: preset.id })}
@@ -219,7 +219,7 @@ export function PresetPanel() {
 
         <div className="preset-actions">
           <button
-            className="preset-action-button"
+            className="preset-action-button ui-button ui-icon-button"
             type="button"
             onClick={() => {
               setSavePresetName(defaultSaveName);
@@ -231,7 +231,7 @@ export function PresetPanel() {
             <SaveIcon />
           </button>
           <button
-            className="preset-action-button"
+            className="preset-action-button ui-button ui-icon-button"
             type="button"
             onClick={handleDeleteSelectedPreset}
             disabled={!canDeleteSelectedPreset}
@@ -242,7 +242,7 @@ export function PresetPanel() {
           </button>
           <div className="preset-action-spacer" />
           <button
-            className="preset-action-button"
+            className="preset-action-button ui-button ui-icon-button"
             type="button"
             onClick={handleApplySelectedPreset}
             disabled={!selectedPreset}

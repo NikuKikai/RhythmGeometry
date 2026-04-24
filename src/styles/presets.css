@@ -1,0 +1,146 @@
+.preset-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 2px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.preset-mode-tabs {
+  flex-wrap: nowrap;
+}
+
+.preset-tab {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 3px 7px;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preset-mode-tabs .preset-tab {
+  flex: 1 1 0;
+}
+
+.preset-star-icon {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.preset-tab:hover,
+.preset-tab.active {
+  border-color: rgba(255, 107, 53, 0.5);
+  color: var(--cream);
+  background: rgba(255, 107, 53, 0.14);
+}
+
+.preset-list {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.preset-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border-radius: 4px;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.preset-button:hover,
+.preset-button.selected {
+  border-color: rgba(255, 107, 53, 0.72);
+  background: rgba(255, 107, 53, 0.12);
+}
+
+.preset-button.selected {
+  color: var(--cream);
+  background: rgba(255, 107, 53, 0.2);
+}
+
+.preset-button small {
+  color: var(--text-muted);
+}
+
+.preset-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  padding: 4px 0 0;
+}
+
+.preset-action-spacer {
+  flex-grow: 1;
+}
+
+.preset-action-button {
+  flex-shrink: 0;
+}
+
+.preset-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.56);
+}
+
+.preset-dialog {
+  display: grid;
+  gap: 10px;
+  width: min(280px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.34);
+}
+
+.preset-dialog label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preset-dialog input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--cream);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.preset-dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.preset-dialog-actions button {
+  border-radius: 5px;
+  padding: 5px 8px;
+}

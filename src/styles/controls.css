@@ -1,0 +1,201 @@
+.steps-delta-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 16px;
+  background: transparent;
+}
+
+.steps-delta-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 0;
+  background: rgba(244, 234, 220, 0.16);
+}
+
+.steps-delta-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: 1px solid rgba(23, 20, 17, 0.8);
+  border-radius: 50%;
+  background: var(--cream);
+}
+
+.steps-delta-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 0;
+  background: rgba(244, 234, 220, 0.16);
+}
+
+.steps-delta-slider::-moz-range-progress {
+  height: 4px;
+  background: transparent;
+}
+
+.steps-delta-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(23, 20, 17, 0.8);
+  border-radius: 50%;
+  background: var(--cream);
+}
+
+.play-button {
+  border-radius: 12px;
+  padding: 4px 8px;
+  width: 80px;
+}
+
+.control-grid-row {
+  display: grid;
+  grid-template-columns: 74px 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.value-readout {
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.control-grid-row input {
+  min-width: 0;
+  width: 100%;
+}
+
+.ring-control-param input[type="number"] {
+  width: 32px;
+  justify-self: end;
+}
+
+.add-ring-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-weight: 500;
+  background: rgba(244, 234, 220, 0.035);
+  color: var(--text-muted);
+}
+
+.ring-controls {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.tracks-label {
+  margin: 2px 0 6px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ring-control {
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(244, 234, 220, 0.045);
+}
+
+.ring-control.active {
+  border-color: rgba(248, 239, 228, 0.32);
+  background: rgba(248, 239, 228, 0.08);
+}
+
+.ring-control-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px auto;
+  column-gap: 1px;
+}
+
+.ring-control-select-button {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 10px;
+  padding: 4px 8px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  min-width: 0;
+}
+
+.ring-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-select-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(248, 239, 228, 0.08);
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.voice-select {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.voice-select option {
+  color: var(--cream);
+  background: var(--panel-strong);
+}
+
+.voice-select-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--cream);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.delete-ring-button {
+  justify-content: center;
+  opacity: 0.72;
+  margin-left: 4px;
+  width: 29px;
+  min-width: 29px;
+}
+
+.delete-ring-button:disabled {
+  cursor: default;
+  opacity: 0.28;
+}
+
+.ring-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}

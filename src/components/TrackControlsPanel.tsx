@@ -41,7 +41,7 @@ const TransportControls = memo(function TransportControls() {
     <>
       <div className="panel-heading">
         <button
-          className="play-button"
+          className="play-button ui-button"
           type="button"
           onClick={handleTogglePlayback}
           title={isPlaying ? "Pause playback" : "Start playback"}
@@ -50,7 +50,7 @@ const TransportControls = memo(function TransportControls() {
         </button>
       </div>
 
-      <div className="control-row">
+      <div className="control-row control-grid-row">
         <span>BPM</span>
         <span className="value-readout">{bpm}</span>
         <input
@@ -62,7 +62,7 @@ const TransportControls = memo(function TransportControls() {
         />
       </div>
 
-      <div className="control-row">
+      <div className="control-row control-grid-row">
         <span>Volume</span>
         <span className="value-readout">{Math.round(masterVolume * 100)}</span>
         <input
@@ -87,7 +87,7 @@ const DeleteRingButton = memo(function DeleteRingButton({
 
   return (
     <button
-      className="delete-ring-button"
+      className="delete-ring-button ui-button ui-icon-button"
       type="button"
       onClick={() => deleteRing(ringId)}
       disabled={ringCount <= 1}
@@ -149,7 +149,12 @@ const TrackControlItem = memo(function TrackControlItem({
   return (
     <div className={isSelected ? "ring-control active" : "ring-control"}>
       <div className="ring-control-heading">
-        <button type="button" onClick={() => selectRing(ring.id)} title={`Select ${ring.label}`}>
+        <button
+          className="ring-control-select-button ui-button"
+          type="button"
+          onClick={() => selectRing(ring.id)}
+          title={`Select ${ring.label}`}
+        >
           <span className="ring-swatch" style={{ background: getTrackColor(ringIndex) }} />
           <span className="ring-title">{voiceLabels.get(ring.voice) ?? ring.voice}</span>
         </button>
@@ -175,7 +180,7 @@ const TrackControlItem = memo(function TrackControlItem({
         <DeleteRingButton ringId={ring.id} ringLabel={ring.label} />
       </div>
 
-      <div className="ring-control-param">
+      <div className="ring-control-param control-grid-row">
         <span>Steps</span>
         <input
           type="number"
@@ -200,7 +205,7 @@ const TrackControlItem = memo(function TrackControlItem({
         />
       </div>
 
-      <div className="ring-control-param">
+      <div className="ring-control-param control-grid-row">
         <span>Offset</span>
         <span className="value-readout">{ring.phaseOffset.toFixed(2)}</span>
         <input
@@ -214,7 +219,7 @@ const TrackControlItem = memo(function TrackControlItem({
         />
       </div>
 
-      <div className="ring-control-param">
+      <div className="ring-control-param control-grid-row">
         <span>Volume</span>
         <span className="value-readout">{Math.round(ring.volume * 100)}</span>
         <input
@@ -240,7 +245,7 @@ const AddTrackButton = memo(function AddTrackButton() {
 
   return (
     <button
-      className="add-ring-button ring-control add-ring-item"
+      className="add-ring-button ui-button"
       type="button"
       onClick={addRing}
       title="Add track"

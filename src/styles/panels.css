@@ -1,0 +1,33 @@
+.panel,
+.inspector-panel,
+.sequencer-card,
+.timeline {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.panel {
+  min-height: 0;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.controls-panel {
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+}
+
+.preset-panel {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-left: 4px;
+  margin-bottom: 6px;
+}
