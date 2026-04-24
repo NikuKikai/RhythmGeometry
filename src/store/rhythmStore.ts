@@ -260,6 +260,9 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
   },
 
   selectRing: (ringId) => {
+    if (get().selectedRingId === ringId) {
+      return;
+    }
     updateAndPersist(set, get, { selectedRingId: ringId });
   },
 
@@ -303,8 +306,15 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
   },
 
   changeRingVolume: (ringId, volume) => {
-    const nextRings = get().rings.map((ring) =>
-      ring.id === ringId ? { ...ring, volume: clamp(volume, 0, 1) } : ring,
+    const nextVolume = clamp(volume, 0, 1);
+    const currentRings = get().rings;
+    const targetRing = currentRings.find((ring) => ring.id === ringId);
+    if (!targetRing || targetRing.volume === nextVolume) {
+      return;
+    }
+
+    const nextRings = currentRings.map((ring) =>
+      ring.id === ringId ? { ...ring, volume: nextVolume } : ring,
     );
     updateAndPersist(set, get, { rings: nextRings });
   },

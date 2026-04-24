@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import {
   getAdjacentInteronsetIntervals,
   getFullIntervalContent,
@@ -11,9 +12,21 @@ function formatSequence(values: Array<number | string>): string {
 }
 
 export function Inspector() {
-  const rings = useRhythmStore((state) => state.rings);
   const selectedRingId = useRhythmStore((state) => state.selectedRingId);
-  const selectedRing = rings.find((ring) => ring.id === selectedRingId) ?? rings[0];
+  const selectedRing = useRhythmStore(
+    useShallow((state) => {
+      const currentRing =
+        state.rings.find((ring) => ring.id === selectedRingId) ??
+        state.rings[0];
+      return currentRing
+        ? {
+            label: currentRing.label,
+            division: currentRing.division,
+            notes: currentRing.notes,
+          }
+        : null;
+    }),
+  );
   const adjacentIntervals = useMemo(
     () =>
       selectedRing
