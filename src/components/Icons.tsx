@@ -59,9 +59,8 @@ export function PlayIcon({ className }: IconProps) {
 export function InfoIcon({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 10v6" />
-      <path d="M12 7.2h0.01" />
+      <path d="M7.9 7.9a4.1 4.1 0 1 1 6.7 3.24c-1.48 1.13-2.08 2.01-2.08 3.76" />
+      <path d="M12 19.2h0.01" />
     </svg>
   );
 }
