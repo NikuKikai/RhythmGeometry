@@ -65,7 +65,7 @@ export const MAX_BPM = 220;
 export const USER_PRESET_CATEGORY = "Favorites";
 export const MIN_NOTE_LEVEL = 0.1;
 export const MAX_NOTE_LEVEL = 1;
-const MIN_PLAYBACK_NOTE_LEVEL = 0.12;
+export const MIN_PLAYBACK_NOTE_LEVEL = 0.12;
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);

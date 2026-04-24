@@ -9,6 +9,7 @@ import {
   getFullIntervalContent,
   getRhythmicContours,
   getScheduledSteps,
+  MIN_PLAYBACK_NOTE_LEVEL,
   normalizeNotes,
   setNoteLevel,
   toggleNoteLevel,
@@ -108,7 +109,7 @@ describe("rhythm helpers", () => {
   });
 
   it("maps note levels to a smoother playback curve", () => {
-    expect(getPlaybackNoteLevel(0.1)).toBeCloseTo(0.12);
+    expect(getPlaybackNoteLevel(0.1)).toBeCloseTo(MIN_PLAYBACK_NOTE_LEVEL);
     expect(getPlaybackNoteLevel(1)).toBeCloseTo(1);
   });
 
