@@ -34,7 +34,7 @@ export function DeleteIcon({ className }: IconProps) {
 
 export function ApplyIcon({ className }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+    <svg className={className} viewBox="1 1 22 22" aria-hidden="true">
       <path strokeWidth={0} fill="currentColor" d="M20.13 5.41 18.72 4l-9.19 9.19-4.25-4.24-1.41 1.41 5.66 5.66zM5 18h14v2H5z" />
     </svg>
   );
@@ -58,7 +58,7 @@ export function PlayIcon({ className }: IconProps) {
 
 export function GenerateIcon({ className }: IconProps) {
   return (
-    <svg className={className} viewBox="-100 -100 612 612" aria-hidden="true">
+    <svg className={className} viewBox="-50 -50 612 612" aria-hidden="true">
       <path
         fill="currentColor"
         stroke="none"

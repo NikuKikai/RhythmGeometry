@@ -115,7 +115,9 @@ input[type="number"] {
 }
 
 input[type="number"] {
-  width: 54px;
+  width: 34px;
+  padding: 2px 4px;
+  font-size: 0.86em;
   appearance: textfield;
   -moz-appearance: textfield;
   text-align: right;

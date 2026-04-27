@@ -34,18 +34,12 @@ export function getOddityViolationCount(notes: number[], division: number): numb
 
 export function generateHopAndJumpRhythm(
   division: number,
-  onsetCount: number,
   hopSize: number,
 ): number[] | null {
   const nextDivision = clampDivision(division);
-  const nextOnsetCount = Math.max(0, Math.min(Math.round(onsetCount), nextDivision));
   const nextHopSize = Math.max(1, Math.round(hopSize));
 
-  if (nextOnsetCount === 0) {
-    return [];
-  }
-
-  if (nextDivision % 2 !== 0) {
+  if (nextDivision % 2 !== 0 || nextHopSize <= 0) {
     return null;
   }
 
@@ -55,7 +49,7 @@ export function generateHopAndJumpRhythm(
   const blocked = new Set<number>([halfTurn]);
   let current = 0;
 
-  while (notes.length < nextOnsetCount) {
+  while (true) {
     const hopped = (current + nextHopSize) % nextDivision;
     let candidate = hopped;
     let attempts = 0;
@@ -66,7 +60,7 @@ export function generateHopAndJumpRhythm(
     }
 
     if (attempts >= nextDivision || noteSet.has(candidate) || blocked.has(candidate)) {
-      return null;
+      break;
     }
 
     notes.push(candidate);

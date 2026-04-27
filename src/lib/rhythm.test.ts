@@ -147,9 +147,9 @@ describe("rhythm helpers", () => {
   });
 
   it("generates oddity rhythms with the Hop-and-Jump algorithm", () => {
-    expect(generateHopAndJumpRhythm(16, 5, 3)).toEqual([0, 3, 6, 9, 12]);
-    expect(generateHopAndJumpRhythm(12, 5, 2)).toEqual([0, 2, 4, 7, 9]);
-    expect(generateHopAndJumpRhythm(8, 5, 1)).toBeNull();
+    expect(generateHopAndJumpRhythm(12, 2)).toEqual([0, 2, 4, 7, 9, 11]);
+    expect(generateHopAndJumpRhythm(16, 3)).toEqual([0, 2, 3, 5, 6, 9, 12, 15]);
+    expect(generateHopAndJumpRhythm(7, 2)).toBeNull();
   });
 });
 
