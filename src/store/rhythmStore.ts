@@ -7,6 +7,7 @@ import {
   changeRingVoice,
   clamp,
   clampBpm,
+  normalizeNoteLevels,
   setNoteLevel,
   toggleNote,
   toggleNoteLevel,
@@ -79,6 +80,7 @@ interface RhythmState {
   changeRingPhaseOffset: (ringId: string, phaseOffset: number) => void;
   changeRingVolume: (ringId: string, volume: number) => void;
   changeRingVoice: (ringId: string, voice: DrumVoice) => void;
+  replaceRingNotes: (ringId: string, notes: number[]) => void;
   addRing: () => void;
   deleteRing: (ringId: string) => void;
   applyTrackPreset: (presetId: string) => void;
@@ -322,6 +324,19 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
   changeRingVoice: (ringId, voice) => {
     const nextRings = get().rings.map((ring) =>
       ring.id === ringId ? changeRingVoice(ring, voice) : ring,
+    );
+    updateAndPersist(set, get, { rings: nextRings });
+  },
+
+  replaceRingNotes: (ringId, notes) => {
+    const nextRings = get().rings.map((ring) =>
+      ring.id === ringId
+        ? {
+            ...ring,
+            notes,
+            noteLevels: normalizeNoteLevels(ring.noteLevels, notes, ring.division),
+          }
+        : ring,
     );
     updateAndPersist(set, get, { rings: nextRings });
   },

@@ -14,10 +14,12 @@ import {
   type Ring,
 } from "./rhythm";
 import {
+  generateHopAndJumpRhythm,
   getAdjacentInteronsetIntervals,
   getGttmAccentHierarchy,
   getGttmSyncopation,
   getFullIntervalContent,
+  getOddityViolationCount,
   getRhythmicContours,
 } from "./inspectorAnalysis";
 
@@ -136,6 +138,18 @@ describe("rhythm helpers", () => {
   it("computes GTTM syncopation as normalized accent weakness", () => {
     expect(getGttmSyncopation([0, 4, 8, 12], 16)).toBeCloseTo(0.25);
     expect(getGttmSyncopation([1, 3, 5, 7], 16)).toBeCloseTo(0.8);
+  });
+
+  it("counts oddity-violating onset pairs", () => {
+    expect(getOddityViolationCount([0, 4, 8, 12], 16)).toBe(2);
+    expect(getOddityViolationCount([0, 3, 7], 12)).toBe(0);
+    expect(getOddityViolationCount([0, 2, 4], 9)).toBe(0);
+  });
+
+  it("generates oddity rhythms with the Hop-and-Jump algorithm", () => {
+    expect(generateHopAndJumpRhythm(16, 5, 3)).toEqual([0, 3, 6, 9, 12]);
+    expect(generateHopAndJumpRhythm(12, 5, 2)).toEqual([0, 2, 4, 7, 9]);
+    expect(generateHopAndJumpRhythm(8, 5, 1)).toBeNull();
   });
 });
 

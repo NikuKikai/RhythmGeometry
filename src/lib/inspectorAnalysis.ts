@@ -11,6 +11,73 @@ export interface GttmAccentBin {
   isNote: boolean;
 }
 
+export function getOddityViolationCount(notes: number[], division: number): number {
+  const nextDivision = clampDivision(division);
+  if (nextDivision % 2 !== 0) {
+    return 0;
+  }
+
+  const normalizedNotes = normalizeNotes(notes, nextDivision);
+  const noteSet = new Set(normalizedNotes);
+  const halfTurn = nextDivision / 2;
+  let violatingPairs = 0;
+
+  normalizedNotes.forEach((note) => {
+    const opposite = (note + halfTurn) % nextDivision;
+    if (note < opposite && noteSet.has(opposite)) {
+      violatingPairs += 1;
+    }
+  });
+
+  return violatingPairs;
+}
+
+export function generateHopAndJumpRhythm(
+  division: number,
+  onsetCount: number,
+  hopSize: number,
+): number[] | null {
+  const nextDivision = clampDivision(division);
+  const nextOnsetCount = Math.max(0, Math.min(Math.round(onsetCount), nextDivision));
+  const nextHopSize = Math.max(1, Math.round(hopSize));
+
+  if (nextOnsetCount === 0) {
+    return [];
+  }
+
+  if (nextDivision % 2 !== 0) {
+    return null;
+  }
+
+  const halfTurn = nextDivision / 2;
+  const notes: number[] = [0];
+  const noteSet = new Set(notes);
+  const blocked = new Set<number>([halfTurn]);
+  let current = 0;
+
+  while (notes.length < nextOnsetCount) {
+    const hopped = (current + nextHopSize) % nextDivision;
+    let candidate = hopped;
+    let attempts = 0;
+
+    while ((noteSet.has(candidate) || blocked.has(candidate)) && attempts < nextDivision) {
+      candidate = (candidate + 1) % nextDivision;
+      attempts += 1;
+    }
+
+    if (attempts >= nextDivision || noteSet.has(candidate) || blocked.has(candidate)) {
+      return null;
+    }
+
+    notes.push(candidate);
+    noteSet.add(candidate);
+    blocked.add((candidate + halfTurn) % nextDivision);
+    current = candidate;
+  }
+
+  return notes.sort((left, right) => left - right);
+}
+
 export function getAdjacentInteronsetIntervals(notes: number[], division: number): number[] {
   const normalized = normalizeNotes(notes, division);
   if (normalized.length === 0) {
