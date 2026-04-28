@@ -31,7 +31,7 @@ export const INSPECTOR_INFO: Record<InspectorInfoKey, InspectorInfoDefinition> =
   intervalContent: {
     label: "Interval Content",
     title: "Full Interval Content",
-    description: "Histogram of pairwise cyclic interval classes in the rhythm. Higher bars mean that interval occurs more often.",
+    description: "Gray bars show full interval content, meaning all pairwise cyclic interval classes in the rhythm. Highlight bars overlay adjacent interval content, derived only from successive interonset intervals around the cycle. Entropy is shown for both distributions after normalization.",
   },
   gttmSyncopation: {
     label: "GTTM syncopation",

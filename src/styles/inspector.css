@@ -1,7 +1,7 @@
 .inspector-panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  padding: 8px;
+  padding: 4px;
   overflow: hidden;
 }
 
@@ -17,6 +17,15 @@
 .inspector-section {
   display: grid;
   gap: 4px;
+}
+
+.inspector-content-block {
+  display: grid;
+  gap: 6px;
+  min-height: 0;
+  padding: 2px 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .inspector-label-row {
@@ -106,7 +115,6 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
-  padding-left: 1em;
 }
 
 .inspector-stepper {
@@ -127,7 +135,7 @@
   display: flex;
   align-items: center;
   color: var(--cream);
-  font-size: 0.64rem;
+  font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   margin-right: 4px;
@@ -180,6 +188,7 @@
 }
 
 .histogram-bar-track {
+  position: relative;
   display: flex;
   align-items: end;
   width: 100%;
@@ -190,8 +199,20 @@
 }
 
 .histogram-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   min-width: 0;
+  background: var(--accent);
+}
+
+.histogram-bar-full {
+  background: rgba(244, 234, 220, 0.25);
+}
+
+.histogram-bar-adjacent {
   background: var(--accent);
 }
 

@@ -131,6 +131,49 @@ export function getFullIntervalContent(notes: number[], division: number): Inter
   return Array.from(counts, ([interval, count]) => ({ interval, count }));
 }
 
+export function getAdjacentIntervalContent(
+  notes: number[],
+  division: number,
+): IntervalContentBin[] {
+  const nextDivision = clampDivision(division);
+  const adjacentIntervals = getAdjacentInteronsetIntervals(notes, nextDivision);
+  const maxInterval = Math.floor(nextDivision / 2);
+  const counts = new Map<number, number>();
+
+  for (let interval = 1; interval <= maxInterval; interval += 1) {
+    counts.set(interval, 0);
+  }
+
+  adjacentIntervals.forEach((interval) => {
+    if (interval <= 0) {
+      return;
+    }
+
+    const normalizedInterval = Math.min(interval, nextDivision - interval);
+    if (normalizedInterval > 0 && normalizedInterval <= maxInterval) {
+      counts.set(normalizedInterval, (counts.get(normalizedInterval) ?? 0) + 1);
+    }
+  });
+
+  return Array.from(counts, ([interval, count]) => ({ interval, count }));
+}
+
+export function getIntervalContentEntropy(intervalContent: IntervalContentBin[]): number {
+  const total = intervalContent.reduce((sum, item) => sum + item.count, 0);
+  if (total <= 0) {
+    return 0;
+  }
+
+  return intervalContent.reduce((entropy, item) => {
+    if (item.count <= 0) {
+      return entropy;
+    }
+
+    const probability = item.count / total;
+    return entropy - probability * Math.log2(probability);
+  }, 0);
+}
+
 export function getGttmAccentHierarchy(notes: number[], division: number): GttmAccentBin[] {
   const nextDivision = clampDivision(division);
   const normalizedNotes = normalizeNotes(notes, nextDivision);

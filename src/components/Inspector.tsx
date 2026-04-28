@@ -1,10 +1,12 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
+  getAdjacentIntervalContent,
   getAdjacentInteronsetIntervals,
   getGttmAccentHierarchy,
   getGttmSyncopation,
   getFullIntervalContent,
+  getIntervalContentEntropy,
   getRhythmicContours,
 } from "../lib/inspectorAnalysis";
 import { useRhythmStore } from "../store/rhythmStore";
@@ -62,7 +64,24 @@ export function Inspector() {
       selectedRing ? getFullIntervalContent(selectedRing.notes, selectedRing.division) : [],
     [selectedRing],
   );
-  const maxIntervalCount = Math.max(1, ...intervalContent.map((item) => item.count));
+  const adjacentIntervalContent = useMemo(
+    () =>
+      selectedRing ? getAdjacentIntervalContent(selectedRing.notes, selectedRing.division) : [],
+    [selectedRing],
+  );
+  const adjacentIntervalContentEntropy = useMemo(
+    () => getIntervalContentEntropy(adjacentIntervalContent),
+    [adjacentIntervalContent],
+  );
+  const intervalContentEntropy = useMemo(
+    () => getIntervalContentEntropy(intervalContent),
+    [intervalContent],
+  );
+  const maxIntervalCount = Math.max(
+    1,
+    ...intervalContent.map((item) => item.count),
+    ...adjacentIntervalContent.map((item) => item.count),
+  );
   const gttmHierarchy = useMemo(
     () => (selectedRing ? getGttmAccentHierarchy(selectedRing.notes, selectedRing.division) : []),
     [selectedRing],
@@ -87,38 +106,55 @@ export function Inspector() {
         <div className="inspector-body">
           <section className="inspector-section">
             <InspectorLabel infoKey="track" onOpenInfo={setOpenInfoKey} />
-            <p className="inspector-value">{selectedRing?.label ?? "None"}</p>
+            <div className="inspector-content-block">
+              <p className="inspector-value">{selectedRing?.label ?? "None"}</p>
+            </div>
           </section>
 
           <section className="inspector-section">
             <InspectorLabel infoKey="adjacentIoi" onOpenInfo={setOpenInfoKey} />
-            <p className="inspector-sequence">{formatSequence(adjacentIntervals)}</p>
+            <div className="inspector-content-block">
+              <p className="inspector-sequence">{formatSequence(adjacentIntervals)}</p>
+            </div>
           </section>
 
           <section className="inspector-section">
             <InspectorLabel infoKey="rhythmicContours" onOpenInfo={setOpenInfoKey} />
-            <p className="inspector-sequence">{formatSequence(rhythmicContours)}</p>
+            <div className="inspector-content-block">
+              <p className="inspector-sequence">{formatSequence(rhythmicContours)}</p>
+            </div>
           </section>
 
           <section className="inspector-section inspector-histogram-section">
             <InspectorLabel infoKey="intervalContent" onOpenInfo={setOpenInfoKey} />
-            <div
-              className="histogram"
-              style={intervalHistogramStyle}
-              aria-label="Full interval content histogram"
-            >
-              {intervalContent.map((item) => (
-                <div className="histogram-column" key={item.interval}>
-                  <span>{item.count}</span>
-                  <div className="histogram-bar-track">
-                    <div
-                      className="histogram-bar"
-                      style={{ height: `${(item.count / maxIntervalCount) * 100}%` }}
-                    />
+            <div className="inspector-content-block">
+              <div
+                className="histogram"
+                style={intervalHistogramStyle}
+                aria-label="Full interval content histogram"
+              >
+                {intervalContent.map((item) => (
+                  <div className="histogram-column" key={item.interval}>
+                    <span>{item.count}</span>
+                    <div className="histogram-bar-track">
+                      <div
+                        className="histogram-bar histogram-bar-full"
+                        style={{ height: `${(item.count / maxIntervalCount) * 100}%` }}
+                      />
+                      <div
+                        className="histogram-bar histogram-bar-adjacent"
+                        style={{
+                          height: `${(((adjacentIntervalContent.find((adjacentItem) => adjacentItem.interval === item.interval)?.count) ?? 0) / maxIntervalCount) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <span>{item.interval}</span>
                   </div>
-                  <span>{item.interval}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <p className="inspector-value inspector-secondary-value">
+                Entropy: full={intervalContentEntropy.toFixed(3)},  adjacent={adjacentIntervalContentEntropy.toFixed(3)}
+              </p>
             </div>
           </section>
 
@@ -128,24 +164,26 @@ export function Inspector() {
               valueText={gttmSyncopation.toFixed(2)}
               onOpenInfo={setOpenInfoKey}
             />
-            <div
-              className="histogram"
-              style={syncopationHistogramStyle}
-              aria-label="GTTM accent hierarchy histogram"
-            >
-              {gttmHierarchy.map((item) => (
-                <div className="histogram-column histogram-column" key={item.step}>
-                  <div className="histogram-bar-track">
-                    <div
-                      className={item.isNote ? "histogram-bar histogram-bar-note" : "histogram-bar histogram-bar-muted"}
-                      style={{ height: `${(item.accent / maxGttmAccent) * 100}%` }}
-                    />
+            <div className="inspector-content-block">
+              <div
+                className="histogram"
+                style={syncopationHistogramStyle}
+                aria-label="GTTM accent hierarchy histogram"
+              >
+                {gttmHierarchy.map((item) => (
+                  <div className="histogram-column histogram-column" key={item.step}>
+                    <div className="histogram-bar-track">
+                      <div
+                        className={item.isNote ? "histogram-bar histogram-bar-note" : "histogram-bar histogram-bar-muted"}
+                        style={{ height: `${(item.accent / maxGttmAccent) * 100}%` }}
+                      />
+                    </div>
+                    <span>
+                      {item.step % syncopationLabelStride === 0 ? item.step + 1 : ""}
+                    </span>
                   </div>
-                  <span>
-                    {item.step % syncopationLabelStride === 0 ? item.step + 1 : ""}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </section>
 
