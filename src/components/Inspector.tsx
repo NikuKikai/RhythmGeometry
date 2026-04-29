@@ -105,10 +105,9 @@ export function Inspector() {
 
         <div className="inspector-body">
           <section className="inspector-section">
-            <InspectorLabel infoKey="track" onOpenInfo={setOpenInfoKey} />
-            <div className="inspector-content-block">
-              <p className="inspector-value">{selectedRing?.label ?? "None"}</p>
-            </div>
+            <InspectorLabel infoKey="track"
+              valueText={selectedRing?.label ?? "None"}
+             onOpenInfo={setOpenInfoKey} />
           </section>
 
           <section className="inspector-section">

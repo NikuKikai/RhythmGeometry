@@ -178,20 +178,17 @@ export function getGttmAccentHierarchy(notes: number[], division: number): GttmA
   const nextDivision = clampDivision(division);
   const normalizedNotes = normalizeNotes(notes, nextDivision);
   const noteSet = new Set(normalizedNotes);
-  const divisors: number[] = [];
+  const accentSteps: number[] = [];
 
-  let subdivision = nextDivision;
-  while (Number.isInteger(subdivision) && subdivision >= 1) {
-    divisors.push(subdivision);
-    if (subdivision === 1) {
-      break;
-    }
-    subdivision /= 2;
+  let stepSize = 1;
+  while (stepSize <= nextDivision) {
+    accentSteps.push(stepSize);
+    stepSize *= 2;
   }
 
   return Array.from({ length: nextDivision }, (_, step) => {
-    const accent = divisors.reduce((level, divisor) => {
-      if (step % divisor === 0) {
+    const accent = accentSteps.reduce((level, multiple) => {
+      if (step % multiple === 0) {
         return level + 1;
       }
       return level;
