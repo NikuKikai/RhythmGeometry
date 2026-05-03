@@ -22,6 +22,8 @@ export interface StoredAppState {
   rings: Ring[];
   selectedRingId: string;
   presetPanel: StoredPresetPanelState;
+  showCentroidArrow: boolean;
+  showLbdmGrouping: boolean;
 }
 
 interface UserPresetsRecord {

@@ -27,6 +27,7 @@ import {
   saveUserPresets,
   type StoredPresetPanelState,
 } from "../lib/storage";
+import { useSequencerUiStore } from "./sequencerUiStore";
 
 export const MAX_TRACKS = 5;
 export const TRACK_COLORS = [
@@ -81,6 +82,8 @@ interface RhythmState {
   changeRingVolume: (ringId: string, volume: number) => void;
   changeRingVoice: (ringId: string, voice: DrumVoice) => void;
   replaceRingNotes: (ringId: string, notes: number[]) => void;
+  toggleCentroidArrowVisibility: () => void;
+  toggleLbdmGroupingVisibility: () => void;
   addRing: () => void;
   deleteRing: (ringId: string) => void;
   applyTrackPreset: (presetId: string) => void;
@@ -136,6 +139,8 @@ function persistAppState(state: RhythmState): void {
     rings: state.rings,
     selectedRingId: state.selectedRingId,
     presetPanel: state.presetPanel,
+    showCentroidArrow: useSequencerUiStore.getState().showCentroidArrow,
+    showLbdmGrouping: useSequencerUiStore.getState().showLbdmGrouping,
   }).catch((error) => {
     console.error("Failed to save app state", error);
   });
@@ -179,6 +184,12 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
         ? normalizeStoredRings(storedAppState.rings)
         : undefined;
       const storedSelectedRingId = storedAppState?.selectedRingId;
+      useSequencerUiStore
+        .getState()
+        .setShowCentroidArrow(storedAppState?.showCentroidArrow ?? false);
+      useSequencerUiStore
+        .getState()
+        .setShowLbdmGrouping(storedAppState?.showLbdmGrouping ?? false);
 
       set((state) => ({
         rings: storedRings ?? state.rings,
@@ -339,6 +350,16 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
         : ring,
     );
     updateAndPersist(set, get, { rings: nextRings });
+  },
+
+  toggleCentroidArrowVisibility: () => {
+    useSequencerUiStore.getState().toggleCentroidArrow();
+    persistAppState(get());
+  },
+
+  toggleLbdmGroupingVisibility: () => {
+    useSequencerUiStore.getState().toggleLbdmGrouping();
+    persistAppState(get());
   },
 
   addRing: () => {

@@ -76,3 +76,12 @@ export function InfoIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function EyeIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2.8 12c2.24-4.02 5.49-6.03 9.2-6.03S18.96 7.98 21.2 12c-2.24 4.02-5.49 6.03-9.2 6.03S5.04 16.02 2.8 12z" />
+      <path d="M12 9.1a2.9 2.9 0 1 1 0 5.8 2.9 2.9 0 0 1 0-5.8z" />
+    </svg>
+  );
+}

@@ -3,6 +3,8 @@ import { useShallow } from "zustand/react/shallow";
 import { useRhythmStore } from "../store/rhythmStore";
 import { useSequencerUiStore } from "../store/sequencerUiStore";
 import { PlayheadLine } from "./radial-sequencer/PlayheadLine";
+import { CentroidArrow } from "./radial-sequencer/CentroidArrow";
+import { LbdmGroupingOverlay } from "./radial-sequencer/LbdmGroupingOverlay";
 import { RadialRingNotes } from "./radial-sequencer/RadialRingNotes";
 import { RadialRingShell } from "./radial-sequencer/RadialRingShell";
 import {
@@ -34,13 +36,12 @@ interface RadialRingProps {
   ) => void;
 }
 
-const RadialRing = memo(function RadialRing({
+const RadialRingShellLayer = memo(function RadialRingShellLayer({
   ringId,
   ringIndex,
   onCellPointerDown,
   onCellClick,
   onCellKeyDown,
-  onNotePointerDown,
 }: RadialRingProps) {
   const isSelected = useRhythmStore((state) => state.selectedRingId === ringId);
 
@@ -53,12 +54,24 @@ const RadialRing = memo(function RadialRing({
         onCellClick={onCellClick}
         onCellKeyDown={onCellKeyDown}
       />
-      <RadialRingNotes
-        ringId={ringId}
-        ringIndex={ringIndex}
-        onNotePointerDown={onNotePointerDown}
-      />
     </g>
+  );
+}, (previous, next) =>
+  previous.ringId === next.ringId &&
+  previous.ringIndex === next.ringIndex,
+);
+
+const RadialRingNotesLayer = memo(function RadialRingNotesLayer({
+  ringId,
+  ringIndex,
+  onNotePointerDown,
+}: RadialRingProps) {
+  return (
+    <RadialRingNotes
+      ringId={ringId}
+      ringIndex={ringIndex}
+      onNotePointerDown={onNotePointerDown}
+    />
   );
 }, (previous, next) =>
   previous.ringId === next.ringId &&
@@ -325,7 +338,7 @@ export function RadialSequencer() {
         })}
 
         {ringIds.map((ringId, ringIndex) => (
-          <RadialRing
+          <RadialRingShellLayer
             key={ringId}
             ringId={ringId}
             ringIndex={ringIndex}
@@ -336,7 +349,19 @@ export function RadialSequencer() {
           />
         ))}
 
+        <LbdmGroupingOverlay />
+
+        {ringIds.map((ringId, ringIndex) => (
+          <RadialRingNotesLayer
+            key={`${ringId}-notes`}
+            ringId={ringId}
+            ringIndex={ringIndex}
+            onNotePointerDown={handleNotePointerDown}
+          />
+        ))}
+
         <PlayheadLine />
+        <CentroidArrow />
       </svg>
     </section>
   );

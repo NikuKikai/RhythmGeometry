@@ -12,6 +12,8 @@ import {
 import { useRhythmStore } from "../store/rhythmStore";
 import { InspectorLabel } from "./inspector/InspectorLabel";
 import { INSPECTOR_INFO, type InspectorInfoKey } from "./inspector/inspectorInfo";
+import { CentroidBalancedSection } from "./inspector/CentroidBalancedSection";
+import { LbdmGroupingSection } from "./inspector/LbdmGroupingSection";
 import { OdditySection } from "./inspector/OdditySection";
 
 function formatSequence(values: Array<number | string>): string {
@@ -187,6 +189,8 @@ export function Inspector() {
           </section>
 
           <OdditySection onOpenInfo={setOpenInfoKey} />
+          <LbdmGroupingSection onOpenInfo={setOpenInfoKey} />
+          <CentroidBalancedSection onOpenInfo={setOpenInfoKey} />
         </div>
       </aside>
 

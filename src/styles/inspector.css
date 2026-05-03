@@ -35,6 +35,12 @@
   gap: 8px;
 }
 
+.inspector-label-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .inspector-label-left {
   display: inline-flex;
   align-items: center;
@@ -86,6 +92,40 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
+}
+
+.inspector-visibility-button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(244, 234, 220, 0.28);
+  border-radius: 999px;
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.inspector-visibility-button:hover {
+  color: var(--cream);
+  border-color: rgba(244, 234, 220, 0.5);
+  background: rgba(244, 234, 220, 0.08);
+}
+
+.inspector-visibility-button.is-active {
+  color: var(--cream);
+  border-color: rgba(244, 234, 220, 0.64);
+  background: rgba(244, 234, 220, 0.14);
+}
+
+.inspector-visibility-icon {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
 }
 
 .inspector-value,

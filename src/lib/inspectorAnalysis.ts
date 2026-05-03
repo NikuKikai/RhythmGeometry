@@ -1,4 +1,5 @@
 import { clampDivision, normalizeNotes } from "./rhythm";
+import { polarToCartesian } from "./geometry";
 
 export interface IntervalContentBin {
   interval: number;
@@ -9,6 +10,18 @@ export interface GttmAccentBin {
   step: number;
   accent: number;
   isNote: boolean;
+}
+
+export interface RhythmCentroid {
+  x: number;
+  y: number;
+  magnitude: number;
+}
+
+export interface LbdmGroupingEdge {
+  fromNote: number;
+  toNote: number;
+  isMutual: boolean;
 }
 
 export function getOddityViolationCount(notes: number[], division: number): number {
@@ -214,4 +227,102 @@ export function getGttmSyncopation(notes: number[], division: number): number {
     0,
   );
   return weaknessSum / (highlighted.length * maxAccent);
+}
+
+export function getRhythmCentroid(
+  notes: number[],
+  division: number,
+  phaseOffset = 0,
+): RhythmCentroid {
+  const nextDivision = clampDivision(division);
+  const normalizedNotes = normalizeNotes(notes, nextDivision);
+  if (normalizedNotes.length === 0) {
+    return {
+      x: 0,
+      y: 0,
+      magnitude: 0,
+    };
+  }
+
+  const sum = normalizedNotes.reduce(
+    (centroid, note) => {
+      const point = polarToCartesian(
+        { x: 0, y: 0 },
+        1,
+        (note + phaseOffset) / nextDivision,
+      );
+      return {
+        x: centroid.x + point.x,
+        y: centroid.y + point.y,
+      };
+    },
+    { x: 0, y: 0 },
+  );
+  const x = sum.x / normalizedNotes.length;
+  const y = sum.y / normalizedNotes.length;
+
+  return {
+    x,
+    y,
+    magnitude: Math.hypot(x, y),
+  };
+}
+
+export function getLbdmGroupingEdges(
+  notes: number[],
+  division: number,
+): LbdmGroupingEdge[] {
+  const nextDivision = clampDivision(division);
+  const normalizedNotes = normalizeNotes(notes, nextDivision);
+  if (normalizedNotes.length < 2) {
+    return [];
+  }
+
+  const nearestByNote = new Map<number, number[]>();
+
+  normalizedNotes.forEach((note) => {
+    let minDistance = Number.POSITIVE_INFINITY;
+    let nearestNotes: number[] = [];
+
+    normalizedNotes.forEach((otherNote) => {
+      if (otherNote === note) {
+        return;
+      }
+
+      const distance = Math.abs(otherNote - note);
+      const wrappedDistance = Math.min(distance, nextDivision - distance);
+      if (wrappedDistance < minDistance) {
+        minDistance = wrappedDistance;
+        nearestNotes = [otherNote];
+        return;
+      }
+
+      if (wrappedDistance === minDistance) {
+        nearestNotes.push(otherNote);
+      }
+    });
+
+    nearestByNote.set(note, nearestNotes);
+  });
+
+  const edgeMap = new Map<string, LbdmGroupingEdge>();
+
+  normalizedNotes.forEach((fromNote) => {
+    const nearestNotes = nearestByNote.get(fromNote) ?? [];
+    nearestNotes.forEach((toNote) => {
+      const lowerNote = Math.min(fromNote, toNote);
+      const higherNote = Math.max(fromNote, toNote);
+      const key = `${lowerNote}-${higherNote}`;
+      const isMutual = (nearestByNote.get(toNote) ?? []).includes(fromNote);
+      const existingEdge = edgeMap.get(key);
+
+      edgeMap.set(key, {
+        fromNote: lowerNote,
+        toNote: higherNote,
+        isMutual: existingEdge?.isMutual ?? isMutual,
+      });
+    });
+  });
+
+  return Array.from(edgeMap.values());
 }

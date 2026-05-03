@@ -102,6 +102,35 @@
   pointer-events: none;
 }
 
+.centroid-arrow-layer {
+  pointer-events: none;
+}
+
+.lbdm-grouping-layer {
+  pointer-events: none;
+}
+
+.lbdm-grouping-edge {
+  stroke: #ffffff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.lbdm-grouping-edge.one-way {
+  stroke-dasharray: 6 6;
+}
+
+.centroid-arrow-line {
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.centroid-arrow-dot {
+  fill: #ffffff;
+}
+
 .ring-offset-arc {
   fill: none;
   stroke: var(--angle-guide);

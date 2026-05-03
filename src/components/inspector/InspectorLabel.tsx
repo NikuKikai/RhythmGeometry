@@ -1,13 +1,20 @@
+import type { ReactNode } from "react";
 import { InfoIcon } from "../Icons";
 import { INSPECTOR_INFO, type InspectorInfoKey } from "./inspectorInfo";
 
 interface InspectorLabelProps {
   infoKey: InspectorInfoKey;
   valueText?: string;
+  actions?: ReactNode;
   onOpenInfo: (key: InspectorInfoKey) => void;
 }
 
-export function InspectorLabel({ infoKey, valueText, onOpenInfo }: InspectorLabelProps) {
+export function InspectorLabel({
+  infoKey,
+  valueText,
+  actions,
+  onOpenInfo,
+}: InspectorLabelProps) {
   const info = INSPECTOR_INFO[infoKey];
 
   return (
@@ -24,7 +31,12 @@ export function InspectorLabel({ infoKey, valueText, onOpenInfo }: InspectorLabe
           <InfoIcon className="inspector-info-icon" />
         </button>
       </div>
-      {valueText && <span className="inspector-label-value">{valueText}</span>}
+      {(valueText || actions) && (
+        <div className="inspector-label-actions">
+          {valueText && <span className="inspector-label-value">{valueText}</span>}
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

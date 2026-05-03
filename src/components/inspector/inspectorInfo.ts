@@ -4,7 +4,9 @@ export type InspectorInfoKey =
   | "rhythmicContours"
   | "intervalContent"
   | "gttmSyncopation"
-  | "oddity";
+  | "oddity"
+  | "lbdmGrouping"
+  | "centroidBalanced";
 
 export interface InspectorInfoDefinition {
   label: string;
@@ -42,5 +44,15 @@ export const INSPECTOR_INFO: Record<InspectorInfoKey, InspectorInfoDefinition> =
     label: "Oddity",
     title: "Rhythmic Oddity",
     description: "Counts onset pairs that split an even cycle into two equal halves. Zero means the rhythm satisfies the oddity property.",
+  },
+  lbdmGrouping: {
+    label: "LBDM Grouping",
+    title: "LBDM Grouping",
+    description: "Shows nearest-neighbor onset connections for the selected track. Solid lines mark pairs of onsets that are mutually nearest. Dashed lines mark one-way nearest relations only. These overlays are drawn on top of the existing colored polygon edges.",
+  },
+  centroidBalanced: {
+    label: "Centroid Balanced",
+    title: "Centroid Balanced",
+    description: "Computes the centroid of the active onsets on the unit circle, including the track phase offset. The displayed value is the centroid distance from the center: lower means more balanced. The eye toggle shows the centroid vector on the radial sequencer.",
   },
 };
