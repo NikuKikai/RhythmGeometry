@@ -36,6 +36,16 @@ interface RadialRingProps {
   ) => void;
 }
 
+interface RadialRingNotesLayerProps {
+  ringId: string;
+  ringIndex: number;
+  onNotePointerDown: (
+    event: PointerEvent<SVGCircleElement>,
+    ring: RingPointerData,
+    noteIndex: number,
+  ) => void;
+}
+
 const RadialRingShellLayer = memo(function RadialRingShellLayer({
   ringId,
   ringIndex,
@@ -65,7 +75,7 @@ const RadialRingNotesLayer = memo(function RadialRingNotesLayer({
   ringId,
   ringIndex,
   onNotePointerDown,
-}: RadialRingProps) {
+}: RadialRingNotesLayerProps) {
   return (
     <RadialRingNotes
       ringId={ringId}
