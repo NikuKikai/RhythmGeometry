@@ -5,6 +5,7 @@
   height: 100%;
   padding: 4px;
   overflow: hidden;
+  border-top-left-radius: 0;
 }
 
 .inspector-body {
@@ -80,12 +81,6 @@
   background: transparent;
 }
 
-.inspector-info-button:hover {
-  color: var(--cream);
-  border-color: rgba(255, 107, 53, 0.72);
-  background: rgba(255, 107, 53, 0.12);
-}
-
 .inspector-info-icon {
   width: 12px;
   height: 12px;
@@ -106,12 +101,6 @@
   padding: 0;
   color: var(--text-muted);
   background: transparent;
-}
-
-.inspector-visibility-button:hover {
-  color: var(--cream);
-  border-color: rgba(244, 234, 220, 0.5);
-  background: rgba(244, 234, 220, 0.08);
 }
 
 .inspector-visibility-button.is-active {
@@ -307,4 +296,18 @@
 .inspector-info-actions button {
   border-radius: 5px;
   padding: 5px 10px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .inspector-info-button:hover {
+    color: var(--cream);
+    border-color: rgba(255, 107, 53, 0.72);
+    background: rgba(255, 107, 53, 0.12);
+  }
+
+  .inspector-visibility-button:hover {
+    color: var(--cream);
+    border-color: rgba(244, 234, 220, 0.5);
+    background: rgba(244, 234, 220, 0.08);
+  }
 }

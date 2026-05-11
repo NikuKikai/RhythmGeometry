@@ -26,6 +26,7 @@
 .preset-panel {
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  border-top-right-radius: 0;
 }
 
 .panel-heading {

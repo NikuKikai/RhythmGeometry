@@ -45,8 +45,8 @@ const SectionChip = memo(function SectionChip({
         <button
           className={
             section.isEnabled
-              ? "section-chip-visibility ui-button ui-icon-button"
-              : "section-chip-visibility ui-button ui-icon-button is-muted"
+              ? "section-chip-visibility floating-overlay-button ui-button ui-icon-button"
+              : "section-chip-visibility floating-overlay-button ui-button ui-icon-button is-muted"
           }
           type="button"
           aria-label={section.isEnabled ? `Disable section ${index + 1}` : `Enable section ${index + 1}`}
@@ -58,7 +58,7 @@ const SectionChip = memo(function SectionChip({
           <EyeIcon />
         </button>
         <button
-          className="section-chip-delete ui-button ui-icon-button"
+          className="section-chip-delete floating-overlay-button ui-button ui-icon-button"
           type="button"
           aria-label={`Delete section ${index + 1}`}
           disabled={sectionCount <= 1}

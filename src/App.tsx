@@ -132,7 +132,7 @@ export default function App() {
           ref={leftPanelShellRef}
         >
           <button
-            className={`panel-toggle panel-toggle-left ui-button ui-icon-button${isLeftPanelOpen ? " is-open" : ""}`}
+            className={`panel-toggle panel-toggle-left floating-overlay-button ui-button ui-icon-button${isLeftPanelOpen ? " is-open" : ""}`}
             type="button"
             onClick={toggleLeftPanel}
             aria-pressed={isLeftPanelOpen}
@@ -153,8 +153,11 @@ export default function App() {
           className={isRightPanelOpen ? "panel-shell right-panel-shell is-open" : "panel-shell right-panel-shell"}
           ref={rightPanelShellRef}
         >
+          <div className="panel-shell-body">
+            <Inspector />
+          </div>
           <button
-            className={`panel-toggle panel-toggle-right ui-button ui-icon-button${isRightPanelOpen ? " is-open" : ""}`}
+            className={`panel-toggle panel-toggle-right floating-overlay-button ui-button ui-icon-button${isRightPanelOpen ? " is-open" : ""}`}
             type="button"
             onClick={toggleRightPanel}
             aria-pressed={isRightPanelOpen}
@@ -162,9 +165,6 @@ export default function App() {
           >
             <PanelRightIcon />
           </button>
-          <div className="panel-shell-body">
-            <Inspector />
-          </div>
         </div>
       </div>
 

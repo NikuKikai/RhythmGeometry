@@ -112,7 +112,6 @@
 
 .panel-toggle {
   position: absolute;
-  top: 8px;
   z-index: 12;
   width: 30px;
   height: 30px;
@@ -120,17 +119,18 @@
 }
 
 .panel-toggle-left {
-  right: -30px;
+  right: -29px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left-width: 0;
 }
 
 .panel-toggle-right {
-  left: -30px;
+  left: -29px;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right-width: 0;
+  border-right-color: var(--panel);
 }
 
 @media (max-width: 1120px) {
@@ -203,13 +203,5 @@
 
   .center-stage {
     grid-column: 1;
-  }
-
-  .panel-toggle-left {
-    right: -30px;
-  }
-
-  .panel-toggle-right {
-    left: -30px;
   }
 }

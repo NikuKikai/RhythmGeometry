@@ -69,19 +69,21 @@ button {
   background: rgba(248, 239, 228, 0.08);
 }
 
-.ui-button:hover {
-  border-color: rgba(255, 107, 53, 0.72);
-  background: rgba(255, 107, 53, 0.12);
-}
-
 .ui-button:disabled {
   cursor: default;
   opacity: 0.34;
 }
 
-.ui-button:disabled:hover {
-  border-color: var(--line);
-  background: rgba(248, 239, 228, 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .ui-button:hover {
+    border-color: rgba(255, 107, 53, 0.72);
+    background: rgba(255, 107, 53, 0.12);
+  }
+
+  .ui-button:disabled:hover {
+    border-color: var(--line);
+    background: rgba(248, 239, 228, 0.08);
+  }
 }
 
 .ui-icon-button {
@@ -102,6 +104,10 @@ button {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
+}
+
+.floating-overlay-button {
+  background: var(--panel);
 }
 
 select,

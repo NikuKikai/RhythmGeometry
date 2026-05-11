@@ -42,7 +42,7 @@ export function ArrangementDock() {
         <HorizontalScrollViewport
           className="arrangement-sections"
           contentClassName="arrangement-sections-content"
-          topInset={20}
+          topInset={22}
           bottomInset={6}
           ariaLabel="Groove sections"
         >
