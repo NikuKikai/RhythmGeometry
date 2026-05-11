@@ -51,10 +51,10 @@
 
 .timeline-note {
   position: absolute;
-  top: 2px;
+  top: 0;
+  bottom: 0;
   z-index: 1;
-  width: 4px;
-  height: 8px;
+  opacity: 0.5;
 }
 
 .timeline-section-divider {

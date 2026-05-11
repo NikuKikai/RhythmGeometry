@@ -43,6 +43,7 @@ const TimelineRow = memo(function TimelineRow({
             className="timeline-note"
             style={{
               left: `${((sectionIndex + (((note + currentRing.phaseOffset) / currentRing.division) % 1)) / sectionCount) * 100}%`,
+              width: `${100 / (sectionCount * currentRing.division)}%`,
               background: getTrackColor(ringIndex),
             }}
           />

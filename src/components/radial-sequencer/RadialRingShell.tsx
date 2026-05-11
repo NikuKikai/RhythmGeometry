@@ -9,7 +9,6 @@ interface RadialRingShellProps {
   ringIndex: number;
   onCellPointerDown: (event: PointerEvent<SVGPathElement>, ring: RingPointerData) => void;
   onCellClick: (ringId: string, stepIndex: number) => void;
-  onCellKeyDown: (event: React.KeyboardEvent<SVGPathElement>, ringId: string, stepIndex: number) => void;
 }
 
 export const RadialRingShell = memo(function RadialRingShell({
@@ -17,7 +16,6 @@ export const RadialRingShell = memo(function RadialRingShell({
   ringIndex,
   onCellPointerDown,
   onCellClick,
-  onCellKeyDown,
 }: RadialRingShellProps) {
   const ring = useRhythmStore((state) => state.rings[ringIndex]);
   const ringDragState = useSequencerUiStore((state) =>
@@ -105,9 +103,6 @@ export const RadialRingShell = memo(function RadialRingShell({
               })}
             onClick={() => onCellClick(ring.id, stepIndex)}
             aria-label={`${ring.label} step ${stepIndex + 1}`}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => onCellKeyDown(event, ring.id, stepIndex)}
           />
         );
       })}

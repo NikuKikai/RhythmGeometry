@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import * as Tone from "tone";
 import { Inspector } from "./components/Inspector";
 import { RadialSequencer } from "./components/RadialSequencer";
 import { Sidebar } from "./components/Sidebar";
@@ -10,11 +11,37 @@ import "./styles/app.css";
 export default function App() {
   const settingsLoaded = useRhythmStore((state) => state.settingsLoaded);
   const hydrate = useRhythmStore((state) => state.hydrate);
+  const togglePlayback = useRhythmStore((state) => state.togglePlayback);
   useDrumPlaybackEngine();
 
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.code !== "Space") {
+        return;
+      }
+
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.closest("input, textarea, select, button"))
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      void Tone.start().then(() => {
+        togglePlayback();
+      });
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [togglePlayback]);
 
   if (!settingsLoaded) {
     return (

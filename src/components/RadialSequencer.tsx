@@ -29,7 +29,6 @@ interface RadialRingProps {
   ringIndex: number;
   onCellPointerDown: (event: PointerEvent<SVGPathElement>, ring: RingPointerData) => void;
   onCellClick: (ringId: string, stepIndex: number) => void;
-  onCellKeyDown: (event: React.KeyboardEvent<SVGPathElement>, ringId: string, stepIndex: number) => void;
   onNotePointerDown: (
     event: PointerEvent<SVGCircleElement>,
     ring: RingPointerData,
@@ -52,7 +51,6 @@ const RadialRingShellLayer = memo(function RadialRingShellLayer({
   ringIndex,
   onCellPointerDown,
   onCellClick,
-  onCellKeyDown,
 }: RadialRingProps) {
   const isSelected = useRhythmStore((state) => state.selectedRingId === ringId);
 
@@ -63,7 +61,6 @@ const RadialRingShellLayer = memo(function RadialRingShellLayer({
         ringIndex={ringIndex}
         onCellPointerDown={onCellPointerDown}
         onCellClick={onCellClick}
-        onCellKeyDown={onCellKeyDown}
       />
     </g>
   );
@@ -309,18 +306,6 @@ export function RadialSequencer() {
     toggleNote(ringId, stepIndex);
   }
 
-  function handleCellKeyDown(
-    event: React.KeyboardEvent<SVGPathElement>,
-    ringId: string,
-    stepIndex: number,
-  ) {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      selectRing(ringId);
-      toggleNote(ringId, stepIndex);
-    }
-  }
-
   return (
     <section className="sequencer-card" aria-label="Circular rhythm editor">
       <div className="sequencer-stage">
@@ -356,7 +341,6 @@ export function RadialSequencer() {
               ringIndex={ringIndex}
               onCellPointerDown={handleCellPointerDown}
               onCellClick={handleCellClick}
-              onCellKeyDown={handleCellKeyDown}
               onNotePointerDown={handleNotePointerDown}
             />
           ))}

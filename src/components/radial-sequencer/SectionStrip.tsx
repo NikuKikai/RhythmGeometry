@@ -23,13 +23,7 @@ const SectionChip = memo(function SectionChip({
 
   return (
     <div
-      className={
-        currentSectionId === sectionId
-          ? "section-chip is-current"
-          : !section.isEnabled
-            ? "section-chip is-disabled"
-            : "section-chip"
-      }
+      className={`section-chip${currentSectionId === sectionId ? " is-current" : ""}${!section.isEnabled ? " is-disabled" : ""}`}
     >
       {playbackSectionId === sectionId && (
         <>
