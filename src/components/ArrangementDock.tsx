@@ -1,8 +1,8 @@
-import * as Tone from "tone";
 import { HorizontalScrollViewport } from "./HorizontalScrollViewport";
 import { SectionStrip } from "./radial-sequencer/SectionStrip";
 import { FollowSectionsIcon } from "./Icons";
 import { Timeline } from "./Timeline";
+import { ensureAudioReady } from "../lib/audio";
 import { useRhythmStore } from "../store/rhythmStore";
 
 export function ArrangementDock() {
@@ -12,7 +12,7 @@ export function ArrangementDock() {
   const setAutoFollowSection = useRhythmStore((state) => state.setAutoFollowSection);
 
   async function handleTogglePlayback() {
-    await Tone.start();
+    await ensureAudioReady();
     togglePlayback();
   }
 

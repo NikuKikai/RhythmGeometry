@@ -28,6 +28,20 @@ const MIN_TRIGGER_GAP_SECONDS = 0.0005;
 const SCHEDULE_AHEAD_SECONDS = 0.001;
 const lastTriggerTimes = new WeakMap<DrumKit, Partial<Record<DrumVoice, number>>>();
 
+export async function ensureAudioReady(): Promise<void> {
+  await Tone.start();
+
+  const toneContext = Tone.getContext();
+  if (toneContext.state !== "running") {
+    await toneContext.resume();
+  }
+
+  const rawContext = toneContext.rawContext;
+  if (rawContext.state !== "running") {
+    await rawContext.resume();
+  }
+}
+
 export function configureLowLatencyAudio(): void {
   const context = Tone.getContext();
   context.lookAhead = 0;

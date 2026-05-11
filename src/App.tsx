@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
-import * as Tone from "tone";
 import { ArrangementDock } from "./components/ArrangementDock";
 import { PanelLeftIcon, PanelRightIcon } from "./components/Icons";
 import { Inspector } from "./components/Inspector";
 import { RadialSequencer } from "./components/RadialSequencer";
 import { Sidebar } from "./components/Sidebar";
 import { useDrumPlaybackEngine } from "./hooks/useDrumPlaybackEngine";
+import { ensureAudioReady } from "./lib/audio";
 import { useRhythmStore } from "./store/rhythmStore";
 import "./styles/app.css";
 
@@ -44,6 +44,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    function unlockAudio() {
+      void ensureAudioReady();
+    }
+
+    window.addEventListener("pointerdown", unlockAudio, { passive: true });
+    return () => window.removeEventListener("pointerdown", unlockAudio);
+  }, []);
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.code !== "Space") {
         return;
@@ -59,7 +68,7 @@ export default function App() {
       }
 
       event.preventDefault();
-      void Tone.start().then(() => {
+      void ensureAudioReady().then(() => {
         togglePlayback();
       });
     }
