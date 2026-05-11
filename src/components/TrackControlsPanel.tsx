@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { DrumVoice } from "../lib/rhythm";
 import { clampDivision, DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
 import { getTrackColor, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
-import { ChevronDownIcon, DeleteIcon } from "./Icons";
+import { ChevronDownIcon, DeleteIcon, FollowSectionsIcon } from "./Icons";
 
 const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
 const MAX_STEP_DELTA = 4;
@@ -31,6 +31,8 @@ const TransportControls = memo(function TransportControls() {
   const changeBpm = useRhythmStore((state) => state.setBpm);
   const changeMasterVolume = useRhythmStore((state) => state.setMasterVolume);
   const togglePlayback = useRhythmStore((state) => state.togglePlayback);
+  const autoFollowSection = useRhythmStore((state) => state.transport.autoFollowSection);
+  const setAutoFollowSection = useRhythmStore((state) => state.setAutoFollowSection);
 
   async function handleTogglePlayback() {
     await Tone.start();
@@ -40,14 +42,25 @@ const TransportControls = memo(function TransportControls() {
   return (
     <>
       <div className="panel-heading">
-        <button
-          className="play-button ui-button"
-          type="button"
-          onClick={handleTogglePlayback}
-          title={isPlaying ? "Pause playback" : "Start playback"}
-        >
-          {isPlaying ? "Pause" : "Play"}
-        </button>
+        <div className="transport-heading">
+          <button
+            className="play-button ui-button"
+            type="button"
+            onClick={handleTogglePlayback}
+            title={isPlaying ? "Pause playback" : "Start playback"}
+          >
+            {isPlaying ? "Pause" : "Play"}
+          </button>
+          <button
+            className={autoFollowSection ? "transport-toggle ui-button ui-icon-button is-active" : "transport-toggle ui-button ui-icon-button"}
+            type="button"
+            onClick={() => setAutoFollowSection(!autoFollowSection)}
+            aria-pressed={autoFollowSection}
+            title={autoFollowSection ? "Auto-follow playback section" : "Keep current section while playing"}
+          >
+            <FollowSectionsIcon />
+          </button>
+        </div>
       </div>
 
       <div className="control-row control-grid-row">

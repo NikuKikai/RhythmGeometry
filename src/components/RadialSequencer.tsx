@@ -7,6 +7,7 @@ import { CentroidArrow } from "./radial-sequencer/CentroidArrow";
 import { LbdmGroupingOverlay } from "./radial-sequencer/LbdmGroupingOverlay";
 import { RadialRingNotes } from "./radial-sequencer/RadialRingNotes";
 import { RadialRingShell } from "./radial-sequencer/RadialRingShell";
+import { SectionStrip } from "./radial-sequencer/SectionStrip";
 import {
   CENTER,
   DRAG_THRESHOLD,
@@ -322,57 +323,60 @@ export function RadialSequencer() {
 
   return (
     <section className="sequencer-card" aria-label="Circular rhythm editor">
-      <svg
-        className={isAnyRingRotating ? "radial-sequencer dragging" : "radial-sequencer"}
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
-        role="img"
-        onPointerMove={handleDragMove}
-        onPointerUp={handleDragEnd}
-        onPointerCancel={handleDragEnd}
-        onLostPointerCapture={handleDragEnd}
-      >
-        {zeroLineSegments.map((segment) => {
-          const start = polarToCartesian(CENTER, segment.fromRadius, 0);
-          const end = polarToCartesian(CENTER, segment.toRadius, 0);
+      <div className="sequencer-stage">
+        <svg
+          className={isAnyRingRotating ? "radial-sequencer dragging" : "radial-sequencer"}
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          role="img"
+          onPointerMove={handleDragMove}
+          onPointerUp={handleDragEnd}
+          onPointerCancel={handleDragEnd}
+          onLostPointerCapture={handleDragEnd}
+        >
+          {zeroLineSegments.map((segment) => {
+            const start = polarToCartesian(CENTER, segment.fromRadius, 0);
+            const end = polarToCartesian(CENTER, segment.toRadius, 0);
 
-          return (
-            <line
-              className="zero-angle-line"
-              key={`${segment.fromRadius}-${segment.toRadius}`}
-              x1={start.x}
-              y1={start.y}
-              x2={end.x}
-              y2={end.y}
+            return (
+              <line
+                className="zero-angle-line"
+                key={`${segment.fromRadius}-${segment.toRadius}`}
+                x1={start.x}
+                y1={start.y}
+                x2={end.x}
+                y2={end.y}
+              />
+            );
+          })}
+
+          {ringIds.map((ringId, ringIndex) => (
+            <RadialRingShellLayer
+              key={ringId}
+              ringId={ringId}
+              ringIndex={ringIndex}
+              onCellPointerDown={handleCellPointerDown}
+              onCellClick={handleCellClick}
+              onCellKeyDown={handleCellKeyDown}
+              onNotePointerDown={handleNotePointerDown}
             />
-          );
-        })}
+          ))}
 
-        {ringIds.map((ringId, ringIndex) => (
-          <RadialRingShellLayer
-            key={ringId}
-            ringId={ringId}
-            ringIndex={ringIndex}
-            onCellPointerDown={handleCellPointerDown}
-            onCellClick={handleCellClick}
-            onCellKeyDown={handleCellKeyDown}
-            onNotePointerDown={handleNotePointerDown}
-          />
-        ))}
+          <LbdmGroupingOverlay />
 
-        <LbdmGroupingOverlay />
+          {ringIds.map((ringId, ringIndex) => (
+            <RadialRingNotesLayer
+              key={`${ringId}-notes`}
+              ringId={ringId}
+              ringIndex={ringIndex}
+              onNotePointerDown={handleNotePointerDown}
+            />
+          ))}
 
-        {ringIds.map((ringId, ringIndex) => (
-          <RadialRingNotesLayer
-            key={`${ringId}-notes`}
-            ringId={ringId}
-            ringIndex={ringIndex}
-            onNotePointerDown={handleNotePointerDown}
-          />
-        ))}
-
-        <PlayheadLine />
-        <CentroidArrow />
-      </svg>
+          <PlayheadLine />
+          <CentroidArrow />
+        </svg>
+      </div>
+      <SectionStrip />
     </section>
   );
 }

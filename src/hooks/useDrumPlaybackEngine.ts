@@ -8,7 +8,7 @@ import {
   triggerDrum,
   type DrumEngine,
 } from "../lib/audio";
-import { getNoteLevel, getPlaybackNoteLevel, type Ring } from "../lib/rhythm";
+import { getNoteLevel, getPlaybackNoteLevel, type Section } from "../lib/rhythm";
 import { useRhythmStore } from "../store/rhythmStore";
 
 const SCHEDULER_INTERVAL_MS = 5;
@@ -20,17 +20,47 @@ interface PlaybackClock {
   intervalId: number | null;
 }
 
+function getEnabledSections(sections: Section[]): Section[] {
+  return sections.filter((section) => section.isEnabled);
+}
+
 export function useDrumPlaybackEngine(): void {
   const engineRef = useRef<DrumEngine | null>(null);
   const playbackRef = useRef<PlaybackClock | null>(null);
   const rafRef = useRef<number | null>(null);
-  const ringsRef = useRef<Ring[]>(useRhythmStore.getState().rings);
+  const sectionsRef = useRef<Section[]>(useRhythmStore.getState().sections);
   const bpmRef = useRef(useRhythmStore.getState().transport.bpm);
-  const cyclePositionRef = useRef(useRhythmStore.getState().transport.cyclePosition);
+  const arrangementPositionRef = useRef(useRhythmStore.getState().transport.arrangementPosition);
 
   const getCycleDuration = useCallback((): number => {
     return (60 / bpmRef.current) * 4;
   }, []);
+
+  const getPlaybackCursor = useCallback((now: number) => {
+    const playback = playbackRef.current;
+    const enabledSections = getEnabledSections(sectionsRef.current);
+    if (!playback || enabledSections.length === 0) {
+      return {
+        arrangementPosition: 0,
+        cyclePosition: 0,
+        playbackSectionId: "",
+      };
+    }
+
+    const cycleDuration = getCycleDuration();
+    const arrangementLength = enabledSections.length;
+    const elapsedCycles = cycleDuration > 0 ? (now - playback.startedAt) / cycleDuration : 0;
+    const normalizedAbsolutePosition =
+      ((elapsedCycles % arrangementLength) + arrangementLength) % arrangementLength;
+    const playbackSectionIndex = Math.floor(normalizedAbsolutePosition) % arrangementLength;
+    const cyclePosition = normalizedAbsolutePosition - playbackSectionIndex;
+
+    return {
+      arrangementPosition: normalizedAbsolutePosition / arrangementLength,
+      cyclePosition,
+      playbackSectionId: enabledSections[playbackSectionIndex]?.id ?? "",
+    };
+  }, [getCycleDuration]);
 
   const stopCyclePositionUpdates = useCallback((): void => {
     if (rafRef.current !== null) {
@@ -42,34 +72,38 @@ export function useDrumPlaybackEngine(): void {
   const runAudioTick = useCallback((): void => {
     const playback = playbackRef.current;
     const engine = engineRef.current;
-    if (!playback || !engine) {
+    const enabledSections = getEnabledSections(sectionsRef.current);
+    if (!playback || !engine || enabledSections.length === 0) {
       return;
     }
 
     const cycleDuration = getCycleDuration();
+    const arrangementLength = enabledSections.length;
     const now = Tone.immediate();
     const currentAbsolutePosition = (now - playback.startedAt) / cycleDuration;
     const from = playback.lastAbsolutePosition;
     const to = currentAbsolutePosition + SCHEDULER_TOLERANCE;
 
-    ringsRef.current.forEach((ring) => {
-      ring.notes.forEach((note) => {
-        const notePosition = ((note + ring.phaseOffset) / ring.division) % 1;
-        const firstCycle = Math.floor(from) - 1;
-        const lastCycle = Math.floor(to) + 1;
+    enabledSections.forEach((section, sectionIndex) => {
+      section.rings.forEach((ring) => {
+        ring.notes.forEach((note) => {
+          const notePosition = ((note + ring.phaseOffset) / ring.division) % 1;
+          const firstLoop = Math.floor(from / arrangementLength) - 1;
+          const lastLoop = Math.floor(to / arrangementLength) + 1;
 
-        for (let cycle = firstCycle; cycle <= lastCycle; cycle += 1) {
-          const eventPosition = cycle + notePosition;
-          if (eventPosition > from && eventPosition <= to) {
-            const eventTime = playback.startedAt + eventPosition * cycleDuration;
-            triggerDrum(
-              engine.kit,
-              ring.voice,
-              Math.max(eventTime, now),
-              ring.volume * getPlaybackNoteLevel(getNoteLevel(ring.noteLevels, note)),
-            );
+          for (let loop = firstLoop; loop <= lastLoop; loop += 1) {
+            const eventPosition = loop * arrangementLength + sectionIndex + notePosition;
+            if (eventPosition > from && eventPosition <= to) {
+              const eventTime = playback.startedAt + eventPosition * cycleDuration;
+              triggerDrum(
+                engine.kit,
+                ring.voice,
+                Math.max(eventTime, now),
+                ring.volume * getPlaybackNoteLevel(getNoteLevel(ring.noteLevels, note)),
+              );
+            }
           }
-        }
+        });
       });
     });
 
@@ -80,17 +114,14 @@ export function useDrumPlaybackEngine(): void {
     stopCyclePositionUpdates();
 
     const update = () => {
-      const playback = playbackRef.current;
-      const cycleDuration = getCycleDuration();
-      const elapsed = playback ? Tone.immediate() - playback.startedAt : 0;
-      const nextCyclePosition = playback && cycleDuration > 0 ? (elapsed / cycleDuration) % 1 : 0;
-
-      useRhythmStore.getState().setCyclePosition(nextCyclePosition);
+      const now = Tone.immediate();
+      const { arrangementPosition, cyclePosition, playbackSectionId } = getPlaybackCursor(now);
+      useRhythmStore.getState().setCyclePosition(cyclePosition, arrangementPosition, playbackSectionId);
       rafRef.current = window.requestAnimationFrame(update);
     };
 
     rafRef.current = window.requestAnimationFrame(update);
-  }, [getCycleDuration, stopCyclePositionUpdates]);
+  }, [getPlaybackCursor, stopCyclePositionUpdates]);
 
   const stopRealtimePlayback = useCallback((): void => {
     const playback = playbackRef.current;
@@ -105,9 +136,10 @@ export function useDrumPlaybackEngine(): void {
     }
   }, [stopCyclePositionUpdates]);
 
-  const startRealtimePlayback = useCallback((startPosition: number): void => {
+  const startRealtimePlayback = useCallback((startArrangementPosition: number): void => {
     const engine = engineRef.current;
-    if (!engine) {
+    const enabledSections = getEnabledSections(sectionsRef.current);
+    if (!engine || enabledSections.length === 0) {
       return;
     }
 
@@ -115,10 +147,15 @@ export function useDrumPlaybackEngine(): void {
     setMasterMuted(engine, false);
 
     const cycleDuration = getCycleDuration();
+    const arrangementLength = enabledSections.length;
     const now = Tone.immediate();
+    const normalizedArrangementPosition =
+      ((startArrangementPosition % 1) + 1) % 1;
+    const startAbsolutePosition = normalizedArrangementPosition * arrangementLength;
+
     playbackRef.current = {
-      startedAt: now - startPosition * cycleDuration,
-      lastAbsolutePosition: startPosition - SCHEDULER_TOLERANCE,
+      startedAt: now - startAbsolutePosition * cycleDuration,
+      lastAbsolutePosition: startAbsolutePosition - SCHEDULER_TOLERANCE,
       intervalId: window.setInterval(runAudioTick, SCHEDULER_INTERVAL_MS),
     };
 
@@ -130,12 +167,19 @@ export function useDrumPlaybackEngine(): void {
     const playback = playbackRef.current;
     if (playback) {
       const oldCycleDuration = (60 / bpmRef.current) * 4;
+      const enabledSections = getEnabledSections(sectionsRef.current);
+      const arrangementLength = Math.max(1, enabledSections.length);
       const elapsed = Tone.immediate() - playback.startedAt;
-      const currentPosition = oldCycleDuration > 0 ? ((elapsed / oldCycleDuration) % 1 + 1) % 1 : 0;
+      const currentAbsolutePosition = oldCycleDuration > 0 ? elapsed / oldCycleDuration : 0;
+      const normalizedArrangementPosition =
+        (((currentAbsolutePosition % arrangementLength) + arrangementLength) % arrangementLength) /
+        arrangementLength;
       const nextCycleDuration = (60 / nextBpm) * 4;
 
-      playback.startedAt = Tone.immediate() - currentPosition * nextCycleDuration;
-      playback.lastAbsolutePosition = currentPosition - SCHEDULER_TOLERANCE;
+      playback.startedAt =
+        Tone.immediate() - normalizedArrangementPosition * arrangementLength * nextCycleDuration;
+      playback.lastAbsolutePosition =
+        normalizedArrangementPosition * arrangementLength - SCHEDULER_TOLERANCE;
     }
 
     bpmRef.current = nextBpm;
@@ -149,12 +193,12 @@ export function useDrumPlaybackEngine(): void {
     setMasterMuted(engineRef.current, true);
     setMasterVolume(engineRef.current, state.transport.masterVolume);
 
-    ringsRef.current = state.rings;
+    sectionsRef.current = state.sections;
     bpmRef.current = state.transport.bpm;
-    cyclePositionRef.current = state.transport.cyclePosition;
+    arrangementPositionRef.current = state.transport.arrangementPosition;
 
     if (state.transport.isPlaying) {
-      startRealtimePlayback(cyclePositionRef.current);
+      startRealtimePlayback(arrangementPositionRef.current);
     }
 
     return () => {
@@ -167,12 +211,12 @@ export function useDrumPlaybackEngine(): void {
   useEffect(
     () =>
       useRhythmStore.subscribe((state, previousState) => {
-        if (state.rings !== previousState.rings) {
-          ringsRef.current = state.rings;
+        if (state.sections !== previousState.sections) {
+          sectionsRef.current = state.sections;
         }
 
-        if (state.transport.cyclePosition !== previousState.transport.cyclePosition) {
-          cyclePositionRef.current = state.transport.cyclePosition;
+        if (state.transport.arrangementPosition !== previousState.transport.arrangementPosition) {
+          arrangementPositionRef.current = state.transport.arrangementPosition;
         }
 
         if (state.transport.bpm !== previousState.transport.bpm) {
@@ -185,7 +229,7 @@ export function useDrumPlaybackEngine(): void {
 
         if (state.transport.isPlaying !== previousState.transport.isPlaying) {
           if (state.transport.isPlaying) {
-            startRealtimePlayback(cyclePositionRef.current);
+            startRealtimePlayback(arrangementPositionRef.current);
           } else {
             stopRealtimePlayback();
           }

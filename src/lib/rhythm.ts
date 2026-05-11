@@ -19,6 +19,12 @@ export interface Ring {
   volume: number;
 }
 
+export interface Section {
+  id: string;
+  rings: Ring[];
+  isEnabled: boolean;
+}
+
 export interface Preset {
   id: string;
   name: string;
@@ -33,9 +39,9 @@ export interface GroovePreset {
   id: string;
   name: string;
   category: string;
-  rings: Array<Omit<Ring, "id" | "phaseOffset" | "noteLevels"> & {
-    noteLevels?: Partial<Record<number, number>>;
-    phaseOffset?: number;
+  sections: Array<{
+    isEnabled?: boolean;
+    rings: Array<Omit<Ring, "id">>;
   }>;
 }
 
@@ -44,7 +50,10 @@ export interface TransportState {
   masterVolume: number;
   isPlaying: boolean;
   cyclePosition: number;
+  arrangementPosition: number;
+  playbackSectionId: string;
   cycleBuckets: number[];
+  autoFollowSection: boolean;
 }
 
 export interface ScheduledStep {

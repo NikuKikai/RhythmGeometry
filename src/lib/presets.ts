@@ -247,98 +247,116 @@ export const GROOVE_PRESETS: GroovePreset[] = [
     id: "straight-house",
     name: "Straight House",
     category: "Dance",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 4, 8, 12], voice: "kick", volume: 0.9 },
-      { label: "Snare", division: 16, notes: [4, 12], voice: "snare", volume: 0.68 },
-      { label: "Closed Hat", division: 16, notes: [2, 6, 10, 14], voice: "closedHat", volume: 0.42 },
-      { label: "Open Hat", division: 16, notes: [6, 14], voice: "openHat", volume: 0.34 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 4, 8, 12], phaseOffset: 0, voice: "kick", volume: 0.9 },
+        { label: "Snare", division: 16, notes: [4, 12], phaseOffset: 0, voice: "snare", volume: 0.68 },
+        { label: "Closed Hat", division: 16, notes: [2, 6, 10, 14], phaseOffset: 0, voice: "closedHat", volume: 0.42 },
+        { label: "Open Hat", division: 16, notes: [6, 14], phaseOffset: 0, voice: "openHat", volume: 0.34 },
+      ],
+    }],
   },
   {
     id: "techno-drive",
     name: "Techno Drive",
     category: "Dance",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 4, 8, 12], voice: "kick", volume: 0.92 },
-      { label: "Snare", division: 16, notes: [4, 12], voice: "snare", volume: 0.58 },
-      { label: "Closed Hat", division: 16, notes: [1, 3, 5, 7, 9, 11, 13, 15], voice: "closedHat", volume: 0.36 },
-      { label: "Tom", division: 16, notes: [7, 15], voice: "tom", volume: 0.42 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 4, 8, 12], phaseOffset: 0, voice: "kick", volume: 0.92 },
+        { label: "Snare", division: 16, notes: [4, 12], phaseOffset: 0, voice: "snare", volume: 0.58 },
+        { label: "Closed Hat", division: 16, notes: [1, 3, 5, 7, 9, 11, 13, 15], phaseOffset: 0, voice: "closedHat", volume: 0.36 },
+        { label: "Tom", division: 16, notes: [7, 15], phaseOffset: 0, voice: "tom", volume: 0.42 },
+      ],
+    }],
   },
   {
     id: "uk-garage",
     name: "UK Garage",
     category: "Dance",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 7, 10], voice: "kick", volume: 0.86 },
-      { label: "Snare", division: 16, notes: [4, 12, 15], voice: "snare", volume: 0.72 },
-      { label: "Closed Hat", division: 16, notes: [2, 5, 8, 11, 14], voice: "closedHat", volume: 0.42 },
-      { label: "Open Hat", division: 16, notes: [6, 13], voice: "openHat", volume: 0.34 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 7, 10], phaseOffset: 0, voice: "kick", volume: 0.86 },
+        { label: "Snare", division: 16, notes: [4, 12, 15], phaseOffset: 0, voice: "snare", volume: 0.72 },
+        { label: "Closed Hat", division: 16, notes: [2, 5, 8, 11, 14], phaseOffset: 0, voice: "closedHat", volume: 0.42 },
+        { label: "Open Hat", division: 16, notes: [6, 13], phaseOffset: 0, voice: "openHat", volume: 0.34 },
+      ],
+    }],
   },
   {
     id: "funk-pocket",
     name: "Funk Pocket",
     category: "Funk",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 3, 6, 10, 13], voice: "kick", volume: 0.86 },
-      { label: "Snare", division: 16, notes: [4, 12, 15], voice: "snare", volume: 0.74 },
-      { label: "Closed Hat", division: 16, notes: [0, 2, 4, 6, 8, 10, 12, 14], voice: "closedHat", volume: 0.36 },
-      { label: "Open Hat", division: 16, notes: [7], voice: "openHat", volume: 0.28 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 3, 6, 10, 13], phaseOffset: 0, voice: "kick", volume: 0.86 },
+        { label: "Snare", division: 16, notes: [4, 12, 15], phaseOffset: 0, voice: "snare", volume: 0.74 },
+        { label: "Closed Hat", division: 16, notes: [0, 2, 4, 6, 8, 10, 12, 14], phaseOffset: 0, voice: "closedHat", volume: 0.36 },
+        { label: "Open Hat", division: 16, notes: [7], phaseOffset: 0, voice: "openHat", volume: 0.28 },
+      ],
+    }],
   },
   {
     id: "breakbeat",
     name: "Breakbeat",
     category: "Funk",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 3, 10, 14], voice: "kick", volume: 0.88 },
-      { label: "Snare", division: 16, notes: [4, 7, 12, 15], voice: "snare", volume: 0.74 },
-      { label: "Closed Hat", division: 16, notes: [0, 2, 5, 6, 8, 10, 13, 14], voice: "closedHat", volume: 0.38 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 3, 10, 14], phaseOffset: 0, voice: "kick", volume: 0.88 },
+        { label: "Snare", division: 16, notes: [4, 7, 12, 15], phaseOffset: 0, voice: "snare", volume: 0.74 },
+        { label: "Closed Hat", division: 16, notes: [0, 2, 5, 6, 8, 10, 13, 14], phaseOffset: 0, voice: "closedHat", volume: 0.38 },
+      ],
+    }],
   },
   {
     id: "bossa-kit",
     name: "Bossa Kit",
     category: "Latin",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 8, 11], voice: "kick", volume: 0.78 },
-      { label: "Snare", division: 16, notes: [3, 6, 10, 14], voice: "snare", volume: 0.56 },
-      { label: "Closed Hat", division: 16, notes: [0, 2, 4, 6, 8, 10, 12, 14], voice: "closedHat", volume: 0.34 },
-      { label: "Tom", division: 16, notes: [0, 3, 6, 10, 12], voice: "tom", volume: 0.36 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 8, 11], phaseOffset: 0, voice: "kick", volume: 0.78 },
+        { label: "Snare", division: 16, notes: [3, 6, 10, 14], phaseOffset: 0, voice: "snare", volume: 0.56 },
+        { label: "Closed Hat", division: 16, notes: [0, 2, 4, 6, 8, 10, 12, 14], phaseOffset: 0, voice: "closedHat", volume: 0.34 },
+        { label: "Tom", division: 16, notes: [0, 3, 6, 10, 12], phaseOffset: 0, voice: "tom", volume: 0.36 },
+      ],
+    }],
   },
   {
     id: "cumbia-kit",
     name: "Cumbia Kit",
     category: "Latin",
-    rings: [
-      { label: "Kick", division: 16, notes: [0, 3, 8, 11], voice: "kick", volume: 0.86 },
-      { label: "Snare", division: 16, notes: [4, 12], voice: "snare", volume: 0.66 },
-      { label: "Closed Hat", division: 16, notes: [0, 2, 4, 6, 8, 10, 12, 14], voice: "closedHat", volume: 0.34 },
-      { label: "Tom", division: 16, notes: [6, 14], voice: "tom", volume: 0.4 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 16, notes: [0, 3, 8, 11], phaseOffset: 0, voice: "kick", volume: 0.86 },
+        { label: "Snare", division: 16, notes: [4, 12], phaseOffset: 0, voice: "snare", volume: 0.66 },
+        { label: "Closed Hat", division: 16, notes: [0, 2, 4, 6, 8, 10, 12, 14], phaseOffset: 0, voice: "closedHat", volume: 0.34 },
+        { label: "Tom", division: 16, notes: [6, 14], phaseOffset: 0, voice: "tom", volume: 0.4 },
+      ],
+    }],
   },
   {
     id: "seven-spiral",
     name: "Seven Spiral",
     category: "Odd",
-    rings: [
-      { label: "Kick", division: 7, notes: [0, 3, 5], voice: "kick", volume: 0.86 },
-      { label: "Snare", division: 7, notes: [2, 6], voice: "snare", volume: 0.68 },
-      { label: "Closed Hat", division: 14, notes: [0, 2, 4, 6, 8, 10, 12], voice: "closedHat", volume: 0.34 },
-      { label: "Tom", division: 7, notes: [1, 4], voice: "tom", volume: 0.42 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 7, notes: [0, 3, 5], phaseOffset: 0, voice: "kick", volume: 0.86 },
+        { label: "Snare", division: 7, notes: [2, 6], phaseOffset: 0, voice: "snare", volume: 0.68 },
+        { label: "Closed Hat", division: 14, notes: [0, 2, 4, 6, 8, 10, 12], phaseOffset: 0, voice: "closedHat", volume: 0.34 },
+        { label: "Tom", division: 7, notes: [1, 4], phaseOffset: 0, voice: "tom", volume: 0.42 },
+      ],
+    }],
   },
   {
     id: "five-step-machine",
     name: "Five Step Machine",
     category: "Odd",
-    rings: [
-      { label: "Kick", division: 5, notes: [0, 2], voice: "kick", volume: 0.88 },
-      { label: "Snare", division: 5, notes: [3], voice: "snare", volume: 0.68 },
-      { label: "Closed Hat", division: 10, notes: [0, 2, 4, 6, 8], voice: "closedHat", volume: 0.36 },
-      { label: "Open Hat", division: 10, notes: [5], voice: "openHat", volume: 0.3 },
-    ],
+    sections: [{
+      rings: [
+        { label: "Kick", division: 5, notes: [0, 2], phaseOffset: 0, voice: "kick", volume: 0.88 },
+        { label: "Snare", division: 5, notes: [3], phaseOffset: 0, voice: "snare", volume: 0.68 },
+        { label: "Closed Hat", division: 10, notes: [0, 2, 4, 6, 8], phaseOffset: 0, voice: "closedHat", volume: 0.36 },
+        { label: "Open Hat", division: 10, notes: [5], phaseOffset: 0, voice: "openHat", volume: 0.3 },
+      ],
+    }],
   },
 ];

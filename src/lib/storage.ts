@@ -1,4 +1,4 @@
-import type { GroovePreset, Preset, Ring } from "./rhythm";
+import type { GroovePreset, Preset, Ring, Section } from "./rhythm";
 
 const DB_NAME = "rhythm-geometry";
 const DB_VERSION = 1;
@@ -19,11 +19,14 @@ export interface StoredPresetPanelState {
 }
 
 export interface StoredAppState {
-  rings: Ring[];
-  selectedRingId: string;
+  rings?: Ring[];
+  sections?: Section[];
+  currentSectionId?: string;
+  selectedRingId?: string;
   presetPanel: StoredPresetPanelState;
   showCentroidArrow: boolean;
   showLbdmGrouping: boolean;
+  autoFollowSection?: boolean;
 }
 
 interface UserPresetsRecord {

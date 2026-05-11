@@ -42,6 +42,8 @@ const NoteDot = memo(function NoteDot({
   onNotePointerDown,
 }: NoteDotProps) {
   const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
+  const playbackSectionId = useRhythmStore((state) => state.transport.playbackSectionId);
+  const currentSectionId = useRhythmStore((state) => state.currentSectionId);
   const ring = useRhythmStore((state) => state.rings[ringIndex]);
   const ringDragState = useSequencerUiStore((state) =>
     state.ringDragState?.ringId === ringId ? state.ringDragState : null,
@@ -66,6 +68,7 @@ const NoteDot = memo(function NoteDot({
     cycleBucketPosition === INACTIVE_CYCLE_BUCKET ? 1 : (cycleBucketPosition - notePosition + 1) % 1;
   const isTriggered =
     isPlaying &&
+    playbackSectionId === currentSectionId &&
     cycleBucketPosition !== INACTIVE_CYCLE_BUCKET &&
     elapsedSinceTrigger < NOTE_FLASH_WINDOW;
   const level = draggedNote?.previewLevel ?? getNoteLevel(ring.noteLevels, note);

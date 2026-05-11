@@ -85,3 +85,13 @@ export function EyeIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function FollowSectionsIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h5v5H4zM15 12h5v5h-5z" />
+      <path d="M8 9c3.4 0 6.1 2.7 6.1 6.1" />
+      <path d="M12.3 14.8 14.2 15l.2 1.9" />
+    </svg>
+  );
+}

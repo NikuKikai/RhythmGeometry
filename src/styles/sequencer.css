@@ -1,10 +1,16 @@
 .sequencer-card {
   display: grid;
-  place-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
   width: 100%;
   height: 100%;
   padding: 6px;
   overflow: hidden;
+}
+
+.sequencer-stage {
+  display: grid;
+  place-items: center;
+  min-height: 0;
 }
 
 .radial-sequencer {
@@ -12,6 +18,111 @@
   max-height: 100%;
   height: auto;
   overflow: visible;
+}
+
+.section-strip {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  padding: 8px 0 2px;
+  background: transparent;
+}
+
+.section-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.section-chip-select {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.section-chip-fill {
+  width: 100%;
+  height: 100%;
+  background: rgba(244, 234, 220, 0.34);
+}
+
+.section-chip.is-current .section-chip-fill {
+  background: var(--cream);
+}
+
+.section-chip.is-disabled .section-chip-fill {
+  opacity: 0.24;
+}
+
+.section-chip-hover {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 24px;
+  height: 20px;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.section-chip:hover .section-chip-hover,
+.section-chip:focus-visible .section-chip-hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.section-chip-visibility {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border-radius: 0;
+  padding: 0;
+}
+
+.section-chip-visibility.is-muted {
+  opacity: 0.5;
+}
+
+.section-chip-playhead {
+  position: absolute;
+  width: 1px;
+  height: 5px;
+  transform: translateX(-1px);
+  background: var(--cream);
+}
+
+.section-chip-playhead.top {
+  top: -5px;
+}
+
+.section-chip-playhead.bottom {
+  bottom: -5px;
+}
+
+.section-chip-add {
+  border: 1px solid rgba(244, 234, 220, 0.3);
+}
+
+.section-chip-add-mark {
+  color: var(--cream);
+  opacity: 0.8;
+  font-size: 1rem;
+  line-height: 0.5;
+  font-weight: bold;
 }
 
 .radial-sequencer.dragging,

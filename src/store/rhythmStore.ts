@@ -16,6 +16,7 @@ import {
   type GroovePreset,
   type Preset,
   type Ring,
+  type Section,
   type TransportState,
 } from "../lib/rhythm";
 import {
@@ -52,15 +53,158 @@ export function getCycleBucketIndex(position: number): number {
   return ((Math.round(position * CYCLE_BUCKET_COUNT) % CYCLE_BUCKET_COUNT) + CYCLE_BUCKET_COUNT) % CYCLE_BUCKET_COUNT;
 }
 
+function createSectionId(): string {
+  return `section-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createRingId(sectionId: string, ringIndex: number): string {
+  return `${sectionId}-ring-${ringIndex}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function normalizeStoredRing(ring: Ring): Ring {
+  const ringWithDivision = changeRingDivision(ring, ring.division);
+  return {
+    ...ringWithDivision,
+    phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
+    volume: clamp(ring.volume, 0, 1),
+  };
+}
+
+function normalizeSectionRings(rings: Ring[], sectionId: string): Ring[] {
+  return rings.slice(0, MAX_TRACKS).map((ring, index) => ({
+    ...normalizeStoredRing(ring),
+    id: createRingId(sectionId, index),
+  }));
+}
+
+function cloneSection(section: Section): Section {
+  const sectionId = createSectionId();
+  return {
+    id: sectionId,
+    isEnabled: section.isEnabled,
+    rings: normalizeSectionRings(section.rings, sectionId),
+  };
+}
+
+function createInitialSections(): Section[] {
+  const sectionId = createSectionId();
+  return [
+    {
+      id: sectionId,
+      isEnabled: true,
+      rings: normalizeSectionRings(DEFAULT_RINGS, sectionId),
+    },
+  ];
+}
+
+function getSelectedRingIndex(rings: Ring[], selectedRingId: string): number {
+  const selectedRingIndex = rings.findIndex((ring) => ring.id === selectedRingId);
+  return selectedRingIndex >= 0 ? selectedRingIndex : 0;
+}
+
+function resolveSelectedRingId(
+  rings: Ring[],
+  previousSelectedRingId: string,
+  preferredRingIndex: number,
+): string {
+  if (rings.some((ring) => ring.id === previousSelectedRingId)) {
+    return previousSelectedRingId;
+  }
+  return rings[Math.min(preferredRingIndex, Math.max(0, rings.length - 1))]?.id ?? "";
+}
+
+function getCurrentSection(sections: Section[], currentSectionId: string): Section | undefined {
+  return sections.find((section) => section.id === currentSectionId) ?? sections[0];
+}
+
+function syncCurrentSectionState(
+  sections: Section[],
+  currentSectionId: string,
+  selectedRingId: string,
+  preferredRingIndex = 0,
+): Pick<RhythmState, "sections" | "currentSectionId" | "rings" | "selectedRingId"> {
+  const currentSection = getCurrentSection(sections, currentSectionId);
+  const rings = currentSection?.rings ?? [];
+  return {
+    sections,
+    currentSectionId: currentSection?.id ?? "",
+    rings,
+    selectedRingId: resolveSelectedRingId(rings, selectedRingId, preferredRingIndex),
+  };
+}
+
+function normalizeGrooveSections(groove: GroovePreset): Section[] {
+  const rawSections =
+    "sections" in groove && Array.isArray(groove.sections) && groove.sections.length > 0
+      ? groove.sections
+      : "rings" in (groove as GroovePreset & { rings?: Ring[] }) &&
+          Array.isArray((groove as GroovePreset & { rings?: Ring[] }).rings)
+        ? [{ isEnabled: true, rings: (groove as GroovePreset & { rings: Ring[] }).rings }]
+        : [];
+
+  return rawSections.map((section) => {
+    const sectionId = createSectionId();
+    return {
+      id: sectionId,
+      isEnabled: section.isEnabled ?? true,
+      rings: normalizeSectionRings(section.rings as Ring[], sectionId),
+    };
+  });
+}
+
+function normalizeStoredGroove(groove: GroovePreset): GroovePreset {
+  if ("sections" in groove && Array.isArray(groove.sections)) {
+    return groove;
+  }
+
+  const legacyRings = (groove as GroovePreset & { rings?: Array<Omit<Ring, "id">> }).rings ?? [];
+  return {
+    id: groove.id,
+    name: groove.name,
+    category: groove.category,
+    sections: [
+      {
+        isEnabled: true,
+        rings: legacyRings.map((ring) => ({
+          ...ring,
+          phaseOffset: ring.phaseOffset ?? 0,
+        })),
+      },
+    ],
+  };
+}
+
+function persistUserPresets(grooves: GroovePreset[], tracks: Preset[]): void {
+  saveUserPresets(grooves, tracks).catch((error) => {
+    console.error("Failed to save user presets", error);
+  });
+}
+
+function persistTransportSettings(transport: TransportState): void {
+  saveTransportSettings({
+    bpm: transport.bpm,
+    masterVolume: transport.masterVolume,
+  }).catch((error) => {
+    console.error("Failed to save transport settings", error);
+  });
+}
+
+const INITIAL_SECTIONS = createInitialSections();
+
 const INITIAL_TRANSPORT: TransportState = {
   bpm: 112,
   masterVolume: 0.82,
   isPlaying: false,
   cyclePosition: 0,
+  arrangementPosition: 0,
+  playbackSectionId: INITIAL_SECTIONS[0]?.id ?? "",
   cycleBuckets: createCycleBuckets(),
+  autoFollowSection: true,
 };
 
 interface RhythmState {
+  sections: Section[];
+  currentSectionId: string;
   rings: Ring[];
   selectedRingId: string;
   transport: TransportState;
@@ -69,11 +213,15 @@ interface RhythmState {
   userTrackPresets: Preset[];
   settingsLoaded: boolean;
   hydrate: () => Promise<void>;
-  setCyclePosition: (cyclePosition: number) => void;
+  setCyclePosition: (cyclePosition: number, arrangementPosition: number, playbackSectionId: string) => void;
   togglePlayback: () => void;
   setBpm: (bpm: number) => void;
   setMasterVolume: (volume: number) => void;
+  setAutoFollowSection: (enabled: boolean) => void;
   setPresetPanelState: (panelState: Partial<StoredPresetPanelState>) => void;
+  selectSection: (sectionId: string) => void;
+  addSection: () => void;
+  toggleSectionEnabled: (sectionId: string) => void;
   selectRing: (ringId: string) => void;
   toggleNote: (ringId: string, noteIndex: number) => void;
   setNoteLevel: (ringId: string, noteIndex: number, level: number) => void;
@@ -94,53 +242,19 @@ interface RhythmState {
   deleteTrackPreset: (presetId: string) => void;
 }
 
-function createRingsFromGroove(groove: GroovePreset): Ring[] {
-  const createdAt = Date.now();
-  return groove.rings.slice(0, MAX_TRACKS).map((ring, index) => ({
-    ...ring,
-    phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
-    id: `${groove.id}-${index}-${createdAt}`,
-    label: `${ring.label} ${index + 1}`,
-  }));
-}
-
-function normalizeStoredRings(rings: Ring[]): Ring[] {
-  return rings.slice(0, MAX_TRACKS).map((ring) => {
-    const ringWithDivision = changeRingDivision(ring, ring.division);
-    return {
-      ...ringWithDivision,
-      phaseOffset: clamp(ring.phaseOffset ?? 0, 0, 1),
-      volume: clamp(ring.volume, 0, 1),
-    };
-  });
-}
-
-function persistUserPresets(grooves: GroovePreset[], tracks: Preset[]): void {
-  saveUserPresets(grooves, tracks).catch((error) => {
-    console.error("Failed to save user presets", error);
-  });
-}
-
-function persistTransportSettings(transport: TransportState): void {
-  saveTransportSettings({
-    bpm: transport.bpm,
-    masterVolume: transport.masterVolume,
-  }).catch((error) => {
-    console.error("Failed to save transport settings", error);
-  });
-}
-
 function persistAppState(state: RhythmState): void {
   if (!state.settingsLoaded) {
     return;
   }
 
   saveAppState({
-    rings: state.rings,
+    sections: state.sections,
+    currentSectionId: state.currentSectionId,
     selectedRingId: state.selectedRingId,
     presetPanel: state.presetPanel,
     showCentroidArrow: useSequencerUiStore.getState().showCentroidArrow,
     showLbdmGrouping: useSequencerUiStore.getState().showLbdmGrouping,
+    autoFollowSection: state.transport.autoFollowSection,
   }).catch((error) => {
     console.error("Failed to save app state", error);
   });
@@ -154,15 +268,32 @@ type SetRhythmState = (
 function updateAndPersist(
   set: SetRhythmState,
   get: () => RhythmState,
-  partial: Partial<Pick<RhythmState, "rings" | "selectedRingId" | "presetPanel">>,
+  partial: Partial<Pick<RhythmState, "sections" | "currentSectionId" | "rings" | "selectedRingId" | "presetPanel" | "transport">>,
 ): void {
   set(partial);
   persistAppState(get());
 }
 
+function mapCurrentSectionRings(
+  state: RhythmState,
+  transform: (ring: Ring, ringIndex: number) => Ring,
+): Pick<RhythmState, "sections" | "rings" | "selectedRingId" | "currentSectionId"> {
+  const nextSections = state.sections.map((section) =>
+    section.id === state.currentSectionId
+      ? {
+          ...section,
+          rings: section.rings.map(transform),
+        }
+      : section,
+  );
+  return syncCurrentSectionState(nextSections, state.currentSectionId, state.selectedRingId);
+}
+
 export const useRhythmStore = create<RhythmState>((set, get) => ({
-  rings: DEFAULT_RINGS,
-  selectedRingId: DEFAULT_RINGS[0]?.id ?? "",
+  sections: INITIAL_SECTIONS,
+  currentSectionId: INITIAL_SECTIONS[0]?.id ?? "",
+  rings: INITIAL_SECTIONS[0]?.rings ?? [],
+  selectedRingId: INITIAL_SECTIONS[0]?.rings[0]?.id ?? "",
   transport: INITIAL_TRANSPORT,
   presetPanel: {
     mode: "grooves",
@@ -180,53 +311,95 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
         loadTransportSettings(),
         loadAppState(),
       ]);
-      const storedRings = storedAppState?.rings?.length
-        ? normalizeStoredRings(storedAppState.rings)
-        : undefined;
-      const storedSelectedRingId = storedAppState?.selectedRingId;
-      useSequencerUiStore
-        .getState()
-        .setShowCentroidArrow(storedAppState?.showCentroidArrow ?? false);
-      useSequencerUiStore
-        .getState()
-        .setShowLbdmGrouping(storedAppState?.showLbdmGrouping ?? false);
 
-      set((state) => ({
-        rings: storedRings ?? state.rings,
-        selectedRingId: storedRings?.some((ring) => ring.id === storedSelectedRingId)
-          ? storedSelectedRingId
-          : storedRings?.[0]?.id ?? state.selectedRingId,
-        presetPanel: storedAppState?.presetPanel ?? state.presetPanel,
-        userGrooves: storedPresets.grooves,
-        userTrackPresets: storedPresets.tracks,
-        transport: storedSettings
-          ? {
-              ...state.transport,
-              bpm: clampBpm(storedSettings.bpm),
-              masterVolume: clamp(storedSettings.masterVolume, 0, 1),
-            }
-          : state.transport,
-        settingsLoaded: true,
-      }));
+      const storedSections =
+        storedAppState?.sections?.length
+          ? storedAppState.sections.map((section) => {
+              const sectionId = section.id || createSectionId();
+              return {
+                id: sectionId,
+                isEnabled: section.isEnabled ?? true,
+                rings: normalizeSectionRings(section.rings, sectionId),
+              };
+            })
+          : storedAppState?.rings?.length
+            ? (() => {
+                const sectionId = createSectionId();
+                return [{
+                  id: sectionId,
+                  isEnabled: true,
+                  rings: normalizeSectionRings(storedAppState.rings, sectionId),
+                }];
+              })()
+            : undefined;
+
+      useSequencerUiStore.getState().setShowCentroidArrow(storedAppState?.showCentroidArrow ?? false);
+      useSequencerUiStore.getState().setShowLbdmGrouping(storedAppState?.showLbdmGrouping ?? false);
+
+      set((state) => {
+        const nextSections = storedSections ?? state.sections;
+        const nextCurrentSectionId =
+          nextSections.some((section) => section.id === storedAppState?.currentSectionId)
+            ? storedAppState?.currentSectionId ?? nextSections[0]?.id ?? state.currentSectionId
+            : nextSections[0]?.id ?? state.currentSectionId;
+        const synced = syncCurrentSectionState(
+          nextSections,
+          nextCurrentSectionId,
+          storedAppState?.selectedRingId ?? state.selectedRingId,
+          getSelectedRingIndex(state.rings, storedAppState?.selectedRingId ?? state.selectedRingId),
+        );
+
+        return {
+          ...synced,
+          presetPanel: storedAppState?.presetPanel ?? state.presetPanel,
+          userGrooves: storedPresets.grooves.map(normalizeStoredGroove),
+          userTrackPresets: storedPresets.tracks,
+          transport: {
+            ...state.transport,
+            bpm: clampBpm(storedSettings?.bpm ?? state.transport.bpm),
+            masterVolume: clamp(storedSettings?.masterVolume ?? state.transport.masterVolume, 0, 1),
+            playbackSectionId: synced.currentSectionId,
+            autoFollowSection: storedAppState?.autoFollowSection ?? state.transport.autoFollowSection,
+          },
+          settingsLoaded: true,
+        };
+      });
     } catch (error) {
       console.error("Failed to load stored settings", error);
       set({ settingsLoaded: true });
     }
   },
 
-  setCyclePosition: (cyclePosition) => {
+  setCyclePosition: (cyclePosition, arrangementPosition, playbackSectionId) => {
     const nextActiveBucket = getCycleBucketIndex(cyclePosition);
-    set((state) => ({
-      transport: {
+    set((state) => {
+      const nextTransport = {
         ...state.transport,
         cyclePosition,
+        arrangementPosition,
+        playbackSectionId,
         cycleBuckets: (() => {
           const nextBuckets = createCycleBuckets();
           nextBuckets[nextActiveBucket] = cyclePosition;
           return nextBuckets;
         })(),
-      },
-    }));
+      };
+
+      if (!state.transport.autoFollowSection || state.currentSectionId === playbackSectionId) {
+        return { transport: nextTransport };
+      }
+
+      const synced = syncCurrentSectionState(
+        state.sections,
+        playbackSectionId,
+        state.selectedRingId,
+        getSelectedRingIndex(state.rings, state.selectedRingId),
+      );
+      return {
+        ...synced,
+        transport: nextTransport,
+      };
+    });
   },
 
   togglePlayback: () => {
@@ -264,12 +437,55 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
     });
   },
 
+  setAutoFollowSection: (enabled) => {
+    updateAndPersist(set, get, {
+      transport: {
+        ...get().transport,
+        autoFollowSection: enabled,
+      },
+    });
+  },
+
   setPresetPanelState: (panelState) => {
-    const nextPresetPanel = {
-      ...get().presetPanel,
-      ...panelState,
-    };
-    updateAndPersist(set, get, { presetPanel: nextPresetPanel });
+    updateAndPersist(set, get, {
+      presetPanel: {
+        ...get().presetPanel,
+        ...panelState,
+      },
+    });
+  },
+
+  selectSection: (sectionId) => {
+    const state = get();
+    const synced = syncCurrentSectionState(
+      state.sections,
+      sectionId,
+      state.selectedRingId,
+      getSelectedRingIndex(state.rings, state.selectedRingId),
+    );
+    updateAndPersist(set, get, synced);
+  },
+
+  addSection: () => {
+    const state = get();
+    const currentSection = getCurrentSection(state.sections, state.currentSectionId);
+    const nextSection = currentSection ? cloneSection(currentSection) : createInitialSections()[0];
+    const nextSections = [...state.sections, nextSection];
+    const synced = syncCurrentSectionState(
+      nextSections,
+      nextSection.id,
+      state.selectedRingId,
+      getSelectedRingIndex(state.rings, state.selectedRingId),
+    );
+    updateAndPersist(set, get, synced);
+  },
+
+  toggleSectionEnabled: (sectionId) => {
+    const state = get();
+    const nextSections = state.sections.map((section) =>
+      section.id === sectionId ? { ...section, isEnabled: !section.isEnabled } : section,
+    );
+    updateAndPersist(set, get, { sections: nextSections });
   },
 
   selectRing: (ringId) => {
@@ -280,7 +496,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
   },
 
   toggleNote: (ringId, noteIndex) => {
-    const nextRings = get().rings.map((ring) =>
+    const nextState = mapCurrentSectionRings(get(), (ring) =>
       ring.id === ringId
         ? {
             ...ring,
@@ -289,11 +505,11 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
           }
         : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   setNoteLevel: (ringId, noteIndex, level) => {
-    const nextRings = get().rings.map((ring) =>
+    const nextState = mapCurrentSectionRings(get(), (ring) =>
       ring.id === ringId
         ? {
             ...ring,
@@ -301,46 +517,60 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
           }
         : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   changeRingDivision: (ringId, division) => {
-    const nextRings = get().rings.map((ring) =>
+    const nextState = mapCurrentSectionRings(get(), (ring) =>
       ring.id === ringId ? changeRingDivision(ring, division) : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   changeRingPhaseOffset: (ringId, phaseOffset) => {
-    const nextRings = get().rings.map((ring) =>
-      ring.id === ringId ? changeRingPhaseOffset(ring, phaseOffset) : ring,
+    const state = get();
+    const ringIndex = state.rings.findIndex((ring) => ring.id === ringId);
+    if (ringIndex < 0) {
+      return;
+    }
+
+    const nextSections = state.sections.map((section) => ({
+      ...section,
+      rings: section.rings.map((ring, index) =>
+        index === ringIndex ? changeRingPhaseOffset(ring, phaseOffset) : ring,
+      ),
+    }));
+    const synced = syncCurrentSectionState(
+      nextSections,
+      state.currentSectionId,
+      state.selectedRingId,
+      ringIndex,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, synced);
   },
 
   changeRingVolume: (ringId, volume) => {
     const nextVolume = clamp(volume, 0, 1);
-    const currentRings = get().rings;
-    const targetRing = currentRings.find((ring) => ring.id === ringId);
+    const targetRing = get().rings.find((ring) => ring.id === ringId);
     if (!targetRing || targetRing.volume === nextVolume) {
       return;
     }
 
-    const nextRings = currentRings.map((ring) =>
+    const nextState = mapCurrentSectionRings(get(), (ring) =>
       ring.id === ringId ? { ...ring, volume: nextVolume } : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   changeRingVoice: (ringId, voice) => {
-    const nextRings = get().rings.map((ring) =>
+    const nextState = mapCurrentSectionRings(get(), (ring) =>
       ring.id === ringId ? changeRingVoice(ring, voice) : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   replaceRingNotes: (ringId, notes) => {
-    const nextRings = get().rings.map((ring) =>
+    const nextState = mapCurrentSectionRings(get(), (ring) =>
       ring.id === ringId
         ? {
             ...ring,
@@ -349,7 +579,7 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
           }
         : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   toggleCentroidArrowVisibility: () => {
@@ -371,15 +601,23 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
     const template =
       RING_TEMPLATES.find((item) => !state.rings.some((ring) => ring.voice === item.voice)) ??
       RING_TEMPLATES[state.rings.length % RING_TEMPLATES.length];
-    const nextRing: Ring = {
-      ...template,
-      id: `${template.id}-${Date.now()}`,
-      label: `${template.label} ${state.rings.length + 1}`,
-    };
-
+    const nextRingIndex = state.rings.length;
+    const nextLabel = `${template.label} ${nextRingIndex + 1}`;
+    const nextSections = state.sections.map((section) => ({
+      ...section,
+      rings: [
+        ...section.rings,
+        {
+          ...template,
+          id: createRingId(section.id, nextRingIndex),
+          label: nextLabel,
+        },
+      ],
+    }));
+    const synced = syncCurrentSectionState(nextSections, state.currentSectionId, state.selectedRingId, nextRingIndex);
     updateAndPersist(set, get, {
-      rings: [...state.rings, nextRing],
-      selectedRingId: nextRing.id,
+      ...synced,
+      selectedRingId: synced.rings[nextRingIndex]?.id ?? synced.selectedRingId,
     });
   },
 
@@ -389,12 +627,22 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       return;
     }
 
-    const nextRings = state.rings.filter((ring) => ring.id !== ringId);
-    updateAndPersist(set, get, {
-      rings: nextRings,
-      selectedRingId:
-        state.selectedRingId === ringId ? nextRings[0]?.id ?? "" : state.selectedRingId,
-    });
+    const ringIndex = state.rings.findIndex((ring) => ring.id === ringId);
+    if (ringIndex < 0) {
+      return;
+    }
+
+    const nextSections = state.sections.map((section) => ({
+      ...section,
+      rings: section.rings.filter((_, index) => index !== ringIndex),
+    }));
+    const synced = syncCurrentSectionState(
+      nextSections,
+      state.currentSectionId,
+      state.selectedRingId,
+      Math.max(0, ringIndex - 1),
+    );
+    updateAndPersist(set, get, synced);
   },
 
   applyTrackPreset: (presetId) => {
@@ -404,10 +652,10 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       return;
     }
 
-    const nextRings = state.rings.map((ring) =>
+    const nextState = mapCurrentSectionRings(state, (ring) =>
       ring.id === state.selectedRingId ? applyPresetToRing(ring, preset) : ring,
     );
-    updateAndPersist(set, get, { rings: nextRings });
+    updateAndPersist(set, get, nextState);
   },
 
   applyGroovePreset: (presetId) => {
@@ -417,10 +665,16 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       return;
     }
 
-    const nextRings = createRingsFromGroove(groove);
+    const nextSections = normalizeGrooveSections(groove);
+    const synced = syncCurrentSectionState(nextSections, nextSections[0]?.id ?? "", state.selectedRingId, 0);
     updateAndPersist(set, get, {
-      rings: nextRings,
-      selectedRingId: nextRings[0]?.id ?? "",
+      ...synced,
+      transport: {
+        ...state.transport,
+        cyclePosition: 0,
+        arrangementPosition: 0,
+        playbackSectionId: synced.currentSectionId,
+      },
     });
   },
 
@@ -431,14 +685,19 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       id: `saved-groove-${savedAt}`,
       name,
       category: USER_PRESET_CATEGORY,
-      rings: state.rings.slice(0, MAX_TRACKS).map(({ label, division, notes, noteLevels, phaseOffset, voice, volume }) => ({
-        label,
-        division,
-        notes,
-        noteLevels,
-        phaseOffset,
-        voice,
-        volume,
+      sections: state.sections.map((section) => ({
+        isEnabled: section.isEnabled,
+        rings: section.rings.slice(0, MAX_TRACKS).map(
+          ({ label, division, notes, noteLevels, phaseOffset, voice, volume }) => ({
+            label,
+            division,
+            notes,
+            noteLevels,
+            phaseOffset,
+            voice,
+            volume,
+          }),
+        ),
       })),
     };
     const nextGrooves = [nextGroove, ...state.userGrooves];

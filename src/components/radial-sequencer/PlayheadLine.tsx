@@ -5,6 +5,13 @@ import { CENTER, OUTER_RADIUS } from "./shared";
 
 export const PlayheadLine = memo(function PlayheadLine() {
   const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
+  const playbackSectionId = useRhythmStore((state) => state.transport.playbackSectionId);
+  const currentSectionId = useRhythmStore((state) => state.currentSectionId);
+
+  if (playbackSectionId !== currentSectionId) {
+    return null;
+  }
+
   const playheadStart = polarToCartesian(CENTER, OUTER_RADIUS + 8, cyclePosition);
   const playheadEnd = polarToCartesian(CENTER, OUTER_RADIUS + 30, cyclePosition);
 

@@ -47,6 +47,33 @@
   width: 80px;
 }
 
+.transport-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.transport-toggle {
+  width: 29px;
+  min-width: 29px;
+}
+
+.transport-toggle.is-active {
+  color: var(--cream);
+  border-color: rgba(255, 107, 53, 0.88);
+  background: rgba(255, 107, 53, 0.22);
+}
+
+.transport-toggle svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .control-grid-row {
   display: grid;
   grid-template-columns: 74px 32px minmax(0, 1fr);

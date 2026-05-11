@@ -40,7 +40,21 @@ export const LbdmGroupingSection = memo(function LbdmGroupingSection({
   );
 
   useEffect(() => {
-    setLbdmGroupingEdges(lbdmGroupingEdges);
+    const currentEdges = useSequencerUiStore.getState().lbdmGroupingEdges;
+    const isSame =
+      currentEdges.length === lbdmGroupingEdges.length &&
+      currentEdges.every((edge, index) => {
+        const nextEdge = lbdmGroupingEdges[index];
+        return (
+          edge.fromNote === nextEdge?.fromNote &&
+          edge.toNote === nextEdge?.toNote &&
+          edge.isMutual === nextEdge?.isMutual
+        );
+      });
+
+    if (!isSame) {
+      setLbdmGroupingEdges(lbdmGroupingEdges);
+    }
   }, [lbdmGroupingEdges, setLbdmGroupingEdges]);
 
   return (

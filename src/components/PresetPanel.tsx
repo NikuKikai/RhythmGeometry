@@ -199,7 +199,7 @@ export function PresetPanel() {
                   onDoubleClick={() => applyGroovePreset(preset.id)}
                 >
                   <span>{preset.name}</span>
-                  <small>{preset.rings.length} tracks</small>
+                  <small>{preset.sections.length} sections</small>
                 </button>
               ))
             : visiblePresets.map((preset) => (
