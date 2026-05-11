@@ -126,17 +126,29 @@ export function Timeline() {
   const sections = useRhythmStore((state) => state.sections);
   const rowCount = sections.reduce((max, section) => Math.max(max, section.rings.length), 0);
   const sectionLayouts = useMemo(() => {
-    let startUnits = 0;
-    return sections.map((section) => {
-      const widthUnits = Math.max(1, ...section.rings.map((ring) => ring.division));
-      const layout = {
-        id: section.id,
-        startUnits,
-        widthUnits,
-      };
-      startUnits += widthUnits;
-      return layout;
-    });
+    return sections.reduce<{
+      layouts: TimelineSectionLayout[];
+      nextStartUnits: number;
+    }>(
+      (accumulator, section) => {
+        const widthUnits = Math.max(1, ...section.rings.map((ring) => ring.division));
+        return {
+          layouts: [
+            ...accumulator.layouts,
+            {
+              id: section.id,
+              startUnits: accumulator.nextStartUnits,
+              widthUnits,
+            },
+          ],
+          nextStartUnits: accumulator.nextStartUnits + widthUnits,
+        };
+      },
+      {
+        layouts: [],
+        nextStartUnits: 0,
+      },
+    ).layouts;
   }, [sections]);
   const totalUnits = sectionLayouts.reduce((sum, sectionLayout) => sum + sectionLayout.widthUnits, 0);
 
