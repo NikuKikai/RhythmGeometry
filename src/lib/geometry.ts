@@ -10,10 +10,11 @@ export interface RingCellPathInput {
   stepIndex: number;
   division: number;
   phaseOffset?: number;
-  gapRadians?: number;
+  gapLength?: number;
 }
 
 const START_ANGLE = -Math.PI / 2;
+const DEFAULT_RING_CELL_GAP_LENGTH = 0.25;
 
 export function polarToCartesian(
   center: Point,
@@ -47,25 +48,40 @@ export function getRingCellPath({
   stepIndex,
   division,
   phaseOffset = 0,
-  gapRadians = 0.0,
+  gapLength = DEFAULT_RING_CELL_GAP_LENGTH,
 }: RingCellPathInput): string {
   const stepSize = (Math.PI * 2) / division;
-  const startAngle = START_ANGLE + (stepIndex + phaseOffset) * stepSize + gapRadians;
-  const endAngle = START_ANGLE + (stepIndex + 1 + phaseOffset) * stepSize - gapRadians;
-  const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+  const baseStartAngle = START_ANGLE + (stepIndex + phaseOffset) * stepSize;
+  const baseEndAngle = START_ANGLE + (stepIndex + 1 + phaseOffset) * stepSize;
+  const outerTrimAngle = getGapTrimAngle(outerRadius, gapLength, stepSize);
+  const innerTrimAngle = getGapTrimAngle(innerRadius, gapLength, stepSize);
+  const outerStartAngle = baseStartAngle + outerTrimAngle;
+  const outerEndAngle = baseEndAngle - outerTrimAngle;
+  const innerStartAngle = baseStartAngle + innerTrimAngle;
+  const innerEndAngle = baseEndAngle - innerTrimAngle;
+  const outerLargeArcFlag = outerEndAngle - outerStartAngle > Math.PI ? 1 : 0;
+  const innerLargeArcFlag = innerEndAngle - innerStartAngle > Math.PI ? 1 : 0;
 
-  const outerStart = pointAtAngle(center, outerRadius, startAngle);
-  const outerEnd = pointAtAngle(center, outerRadius, endAngle);
-  const innerEnd = pointAtAngle(center, innerRadius, endAngle);
-  const innerStart = pointAtAngle(center, innerRadius, startAngle);
+  const outerStart = pointAtAngle(center, outerRadius, outerStartAngle);
+  const outerEnd = pointAtAngle(center, outerRadius, outerEndAngle);
+  const innerEnd = pointAtAngle(center, innerRadius, innerEndAngle);
+  const innerStart = pointAtAngle(center, innerRadius, innerStartAngle);
 
   return [
     `M ${round(outerStart.x)} ${round(outerStart.y)}`,
-    `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${round(outerEnd.x)} ${round(outerEnd.y)}`,
+    `A ${outerRadius} ${outerRadius} 0 ${outerLargeArcFlag} 1 ${round(outerEnd.x)} ${round(outerEnd.y)}`,
     `L ${round(innerEnd.x)} ${round(innerEnd.y)}`,
-    `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${round(innerStart.x)} ${round(innerStart.y)}`,
+    `A ${innerRadius} ${innerRadius} 0 ${innerLargeArcFlag} 0 ${round(innerStart.x)} ${round(innerStart.y)}`,
     "Z",
   ].join(" ");
+}
+
+function getGapTrimAngle(radius: number, gapLength: number, stepSize: number): number {
+  if (radius <= 0 || gapLength <= 0) {
+    return 0;
+  }
+
+  return Math.min(gapLength / radius, stepSize * 0.5 - 0.0001);
 }
 
 function pointAtAngle(center: Point, radius: number, angle: number): Point {
