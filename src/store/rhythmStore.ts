@@ -385,7 +385,12 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
         })(),
       };
 
-      if (!state.transport.autoFollowSection || state.currentSectionId === playbackSectionId) {
+      const isDraggingRing = useSequencerUiStore.getState().ringDragState?.isRotating ?? false;
+      if (
+        !state.transport.autoFollowSection ||
+        state.currentSectionId === playbackSectionId ||
+        isDraggingRing
+      ) {
         return { transport: nextTransport };
       }
 
