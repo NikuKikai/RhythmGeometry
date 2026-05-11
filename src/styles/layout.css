@@ -4,7 +4,8 @@
   gap: 6px;
   width: 100%;
   height: 100%;
-  padding: 6px;
+  padding: 0;
+  padding-top: 6px;;
   overflow: hidden;
 }
 
@@ -38,16 +39,34 @@
 }
 
 .workspace {
+  --left-panel-width: 280px;
+  --right-panel-width: 280px;
+  --panel-toggle-offset: 15px;
   display: grid;
   grid-template-columns: 280px minmax(360px, 1fr) 280px;
   gap: 6px;
   min-height: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.workspace.left-collapsed {
+  grid-template-columns: 0 minmax(360px, 1fr) 280px;
+}
+
+.workspace.right-collapsed {
+  grid-template-columns: 280px minmax(360px, 1fr) 0;
+}
+
+.workspace.left-collapsed.right-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
 }
 
 .sidebar {
   display: grid;
   grid-template-rows: minmax(120px, 1fr) minmax(0, 1.5fr);
+  width: 100%;
+  height: 100%;
   gap: 6px;
   min-height: 0;
   overflow: hidden;
@@ -55,23 +74,142 @@
 
 .center-stage {
   display: grid;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.workspace-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.26);
+  cursor: default;
+}
+
+.panel-shell {
+  display: grid;
+  position: relative;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+.panel-shell-body {
+  width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
 
+.panel-toggle {
+  position: absolute;
+  top: 8px;
+  z-index: 12;
+  width: 30px;
+  height: 30px;
+  pointer-events: auto;
+}
+
+.panel-toggle-left {
+  right: -30px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left-width: 0;
+}
+
+.panel-toggle-right {
+  left: -30px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right-width: 0;
+}
+
 @media (max-width: 1120px) {
   .workspace {
+    --left-panel-width: 260px;
+    --right-panel-width: 160px;
     grid-template-columns: 260px minmax(300px, 1fr) 160px;
+  }
+
+  .workspace.left-collapsed {
+    grid-template-columns: 0 minmax(300px, 1fr) 160px;
+  }
+
+  .workspace.right-collapsed {
+    grid-template-columns: 260px minmax(300px, 1fr) 0;
   }
 }
 
-@media (max-width: 760px) {
-  .app-shell {
-    padding: 6px;
+@media (orientation: portrait) {
+  .workspace,
+  .workspace.left-collapsed,
+  .workspace.right-collapsed,
+  .workspace.left-collapsed.right-collapsed,
+  .workspace.is-portrait,
+  .workspace.is-portrait.left-collapsed,
+  .workspace.is-portrait.right-collapsed,
+  .workspace.is-portrait.left-collapsed.right-collapsed {
+    --left-panel-width: min(320px, calc(100vw - 24px));
+    --right-panel-width: min(320px, calc(100vw - 24px));
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .workspace {
-    grid-template-columns: 210px minmax(260px, 1fr) 80px;
+  .panel-shell {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    width: min(320px, calc(100vw - 24px));
+    max-width: 82vw;
+    pointer-events: none;
+    transition:
+      transform 140ms ease;
+  }
+
+  .panel-shell-body {
+    pointer-events: none;
+  }
+
+  .panel-shell.is-open .panel-shell-body {
+    pointer-events: auto;
+  }
+
+  .left-panel-shell {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  .left-panel-shell.is-open {
+    transform: translateX(0);
+  }
+
+  .right-panel-shell {
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  .right-panel-shell.is-open {
+    transform: translateX(0);
+  }
+
+  .center-stage {
+    grid-column: 1;
+  }
+
+  .panel-toggle-left {
+    right: -30px;
+  }
+
+  .panel-toggle-right {
+    left: -30px;
   }
 }

@@ -7,7 +7,6 @@ import { CentroidArrow } from "./radial-sequencer/CentroidArrow";
 import { LbdmGroupingOverlay } from "./radial-sequencer/LbdmGroupingOverlay";
 import { RadialRingNotes } from "./radial-sequencer/RadialRingNotes";
 import { RadialRingShell } from "./radial-sequencer/RadialRingShell";
-import { SectionStrip } from "./radial-sequencer/SectionStrip";
 import {
   CENTER,
   DRAG_THRESHOLD,
@@ -360,7 +359,6 @@ export function RadialSequencer() {
           <CentroidArrow />
         </svg>
       </div>
-      <SectionStrip />
     </section>
   );
 }

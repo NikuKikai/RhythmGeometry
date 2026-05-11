@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useRhythmStore } from "../../store/rhythmStore";
-import { EyeIcon } from "../Icons";
+import { DeleteIcon, EyeIcon } from "../Icons";
 
 const SectionChip = memo(function SectionChip({
   sectionId,
@@ -14,8 +14,10 @@ const SectionChip = memo(function SectionChip({
   const section = useRhythmStore((state) => state.sections[index] ?? null);
   const playbackSectionId = useRhythmStore((state) => state.transport.playbackSectionId);
   const cyclePosition = useRhythmStore((state) => state.transport.cyclePosition);
+  const sectionCount = useRhythmStore((state) => state.sections.length);
   const selectSection = useRhythmStore((state) => state.selectSection);
   const toggleSectionEnabled = useRhythmStore((state) => state.toggleSectionEnabled);
+  const deleteSection = useRhythmStore((state) => state.deleteSection);
 
   if (!section || section.id !== sectionId) {
     return null;
@@ -35,7 +37,6 @@ const SectionChip = memo(function SectionChip({
         className="section-chip-select"
         type="button"
         aria-label={`Section ${index + 1}`}
-        title={`Section ${index + 1}`}
         onClick={() => selectSection(sectionId)}
       >
         <span className="section-chip-fill" />
@@ -49,13 +50,24 @@ const SectionChip = memo(function SectionChip({
           }
           type="button"
           aria-label={section.isEnabled ? `Disable section ${index + 1}` : `Enable section ${index + 1}`}
-          title={section.isEnabled ? `Disable section ${index + 1}` : `Enable section ${index + 1}`}
           onClick={(event) => {
             event.stopPropagation();
             toggleSectionEnabled(sectionId);
           }}
         >
           <EyeIcon />
+        </button>
+        <button
+          className="section-chip-delete ui-button ui-icon-button"
+          type="button"
+          aria-label={`Delete section ${index + 1}`}
+          disabled={sectionCount <= 1}
+          onClick={(event) => {
+            event.stopPropagation();
+            deleteSection(sectionId);
+          }}
+        >
+          <DeleteIcon />
         </button>
       </span>
     </div>
@@ -75,7 +87,6 @@ export const SectionStrip = memo(function SectionStrip() {
         className="section-chip section-chip-add"
         type="button"
         aria-label="Add section"
-        title="Add section"
         onClick={addSection}
       >
         <span className="section-chip-add-mark">+</span>

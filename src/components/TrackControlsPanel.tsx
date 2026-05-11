@@ -1,10 +1,9 @@
 import { memo, useState } from "react";
-import * as Tone from "tone";
 import { useShallow } from "zustand/react/shallow";
 import type { DrumVoice } from "../lib/rhythm";
 import { clampDivision, DRUM_VOICES, MAX_BPM, MAX_DIVISION, MIN_BPM, MIN_DIVISION } from "../lib/rhythm";
 import { getTrackColor, MAX_TRACKS, useRhythmStore } from "../store/rhythmStore";
-import { ChevronDownIcon, DeleteIcon, FollowSectionsIcon } from "./Icons";
+import { ChevronDownIcon, DeleteIcon } from "./Icons";
 
 const voiceLabels = new Map(DRUM_VOICES.map((voice) => [voice.value, voice.label]));
 const MAX_STEP_DELTA = 4;
@@ -24,43 +23,16 @@ interface DeleteRingButtonProps {
   ringLabel: string;
 }
 
-const TransportControls = memo(function TransportControls() {
+const TempoControls = memo(function TempoControls() {
   const bpm = useRhythmStore((state) => state.transport.bpm);
   const masterVolume = useRhythmStore((state) => state.transport.masterVolume);
-  const isPlaying = useRhythmStore((state) => state.transport.isPlaying);
   const changeBpm = useRhythmStore((state) => state.setBpm);
   const changeMasterVolume = useRhythmStore((state) => state.setMasterVolume);
-  const togglePlayback = useRhythmStore((state) => state.togglePlayback);
-  const autoFollowSection = useRhythmStore((state) => state.transport.autoFollowSection);
-  const setAutoFollowSection = useRhythmStore((state) => state.setAutoFollowSection);
-
-  async function handleTogglePlayback() {
-    await Tone.start();
-    togglePlayback();
-  }
 
   return (
     <>
       <div className="panel-heading">
-        <div className="transport-heading">
-          <button
-            className="play-button ui-button"
-            type="button"
-            onClick={handleTogglePlayback}
-            title={isPlaying ? "Pause playback" : "Start playback"}
-          >
-            {isPlaying ? "Pause" : "Play"}
-          </button>
-          <button
-            className={autoFollowSection ? "transport-toggle ui-button ui-icon-button is-active" : "transport-toggle ui-button ui-icon-button"}
-            type="button"
-            onClick={() => setAutoFollowSection(!autoFollowSection)}
-            aria-pressed={autoFollowSection}
-            title={autoFollowSection ? "Auto-follow playback section" : "Keep current section while playing"}
-          >
-            <FollowSectionsIcon />
-          </button>
-        </div>
+        <p className="tracks-label">Transport</p>
       </div>
 
       <div className="control-row control-grid-row">
@@ -273,7 +245,7 @@ export function TrackControlsPanel() {
 
   return (
     <section className="panel controls-panel">
-      <TransportControls />
+      <TempoControls />
 
       <p className="tracks-label">Tracks</p>
       <div className="ring-controls">

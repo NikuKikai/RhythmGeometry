@@ -1,17 +1,29 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
+import { HorizontalScrollViewport } from "./HorizontalScrollViewport";
 import { getTrackColor, useRhythmStore } from "../store/rhythmStore";
+
+const TIMELINE_MIN_CELL_WIDTH = 12;
 
 interface TimelineRowProps {
   ringIndex: number;
+  sectionLayouts: TimelineSectionLayout[];
+  totalUnits: number;
+}
+
+interface TimelineSectionLayout {
+  id: string;
+  startUnits: number;
+  widthUnits: number;
 }
 
 const TimelineRow = memo(function TimelineRow({
   ringIndex,
+  sectionLayouts,
+  totalUnits,
 }: TimelineRowProps) {
   const sections = useRhythmStore((state) => state.sections);
-  const sectionCount = sections.length;
 
-  if (sectionCount === 0) {
+  if (sectionLayouts.length === 0 || totalUnits <= 0) {
     return null;
   }
 
@@ -19,13 +31,15 @@ const TimelineRow = memo(function TimelineRow({
     <div className="timeline-row">
       {sections.flatMap((section, sectionIndex) => {
         const currentRing = section.rings[ringIndex];
+        const sectionLayout = sectionLayouts[sectionIndex];
         if (!currentRing) {
           return [];
         }
 
         const markers = Array.from({ length: currentRing.division }, (_, index) => {
           const localPosition = ((index + currentRing.phaseOffset) / currentRing.division) % 1;
-          const left = ((sectionIndex + localPosition) / sectionCount) * 100;
+          const left =
+            ((sectionLayout.startUnits + localPosition * sectionLayout.widthUnits) / totalUnits) * 100;
           const isStrong = index === 0 || index % Math.max(1, currentRing.division / 4) === 0;
 
           return (
@@ -42,8 +56,8 @@ const TimelineRow = memo(function TimelineRow({
             key={`${section.id}-note-${note}`}
             className="timeline-note"
             style={{
-              left: `${((sectionIndex + (((note + currentRing.phaseOffset) / currentRing.division) % 1)) / sectionCount) * 100}%`,
-              width: `${100 / (sectionCount * currentRing.division)}%`,
+              left: `${((sectionLayout.startUnits + ((((note + currentRing.phaseOffset) / currentRing.division) % 1) * sectionLayout.widthUnits)) / totalUnits) * 100}%`,
+              width: `${(sectionLayout.widthUnits / (totalUnits * currentRing.division)) * 100}%`,
               background: getTrackColor(ringIndex),
             }}
           />
@@ -65,18 +79,22 @@ function TimelinePlayhead() {
   );
 }
 
-function TimelineSectionBands() {
-  const sectionCount = useRhythmStore((state) => state.sections.length);
-
+function TimelineSectionBands({
+  sectionLayouts,
+  totalUnits,
+}: {
+  sectionLayouts: TimelineSectionLayout[];
+  totalUnits: number;
+}) {
   return (
     <>
-      {Array.from({ length: sectionCount }, (_, index) => (
+      {sectionLayouts.map((sectionLayout, index) => (
         <span
-          key={index}
+          key={sectionLayout.id}
           className={index % 2 === 0 ? "timeline-section-band" : "timeline-section-band alt"}
           style={{
-            left: `${(index / sectionCount) * 100}%`,
-            width: `${100 / sectionCount}%`,
+            left: `${(sectionLayout.startUnits / totalUnits) * 100}%`,
+            width: `${(sectionLayout.widthUnits / totalUnits) * 100}%`,
           }}
         />
       ))}
@@ -84,16 +102,20 @@ function TimelineSectionBands() {
   );
 }
 
-function TimelineSectionDividers() {
-  const sectionCount = useRhythmStore((state) => state.sections.length);
-
+function TimelineSectionDividers({
+  sectionLayouts,
+  totalUnits,
+}: {
+  sectionLayouts: TimelineSectionLayout[];
+  totalUnits: number;
+}) {
   return (
     <>
-      {Array.from({ length: Math.max(0, sectionCount - 1) }, (_, index) => (
+      {sectionLayouts.slice(1).map((sectionLayout) => (
         <span
-          key={index}
+          key={sectionLayout.id}
           className="timeline-section-divider"
-          style={{ left: `${((index + 1) / sectionCount) * 100}%` }}
+          style={{ left: `${(sectionLayout.startUnits / totalUnits) * 100}%` }}
         />
       ))}
     </>
@@ -103,20 +125,47 @@ function TimelineSectionDividers() {
 export function Timeline() {
   const sections = useRhythmStore((state) => state.sections);
   const rowCount = sections.reduce((max, section) => Math.max(max, section.rings.length), 0);
+  const sectionLayouts = useMemo(() => {
+    let startUnits = 0;
+    return sections.map((section) => {
+      const widthUnits = Math.max(1, ...section.rings.map((ring) => ring.division));
+      const layout = {
+        id: section.id,
+        startUnits,
+        widthUnits,
+      };
+      startUnits += widthUnits;
+      return layout;
+    });
+  }, [sections]);
+  const totalUnits = sectionLayouts.reduce((sum, sectionLayout) => sum + sectionLayout.widthUnits, 0);
 
   return (
-    <div className="timeline" aria-label="Arrangement timeline">
-      <div className="timeline-track" style={{ "--track-count": rowCount } as React.CSSProperties}>
-        <TimelineSectionBands />
+    <HorizontalScrollViewport
+      className="timeline"
+      bottomInset={8}
+      topInset={8}
+      ariaLabel="Arrangement timeline"
+    >
+      <div
+        className="timeline-track"
+        style={{
+          "--track-count": rowCount,
+          minWidth: `${Math.max(1, totalUnits) * TIMELINE_MIN_CELL_WIDTH}px`,
+        } as React.CSSProperties}
+      >
+        <TimelineSectionBands sectionLayouts={sectionLayouts} totalUnits={totalUnits} />
         {Array.from({ length: rowCount }, (_, ringIndex) => (
           <TimelineRow
             key={ringIndex}
             ringIndex={ringIndex}
+            sectionLayouts={sectionLayouts}
+            totalUnits={totalUnits}
           />
         ))}
-        <TimelineSectionDividers />
+        <TimelineSectionDividers sectionLayouts={sectionLayouts} totalUnits={totalUnits} />
         <TimelinePlayhead />
       </div>
-    </div>
+    </HorizontalScrollViewport>
   );
 }

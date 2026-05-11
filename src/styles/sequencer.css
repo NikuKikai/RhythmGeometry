@@ -1,6 +1,4 @@
 .sequencer-card {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -11,8 +9,10 @@
 
 .sequencer-stage {
   display: flex;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  max-width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -28,25 +28,17 @@
   overflow: visible;
 }
 
-.section-strip {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 1px;
-  padding: 8px 0 2px;
-  background: transparent;
-}
-
 .section-chip {
   position: relative;
   display: grid;
   place-items: center;
-  width: 50px;
+  width: var(--section-chip-width, 60px);
   height: 20px;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
+  overflow: visible;
 }
 
 .section-chip-select {
@@ -95,10 +87,13 @@
   position: absolute;
   left: 50%;
   bottom: 100%;
-  width: 24px;
+  display: flex;
+  gap: 1px;
+  width: auto;
   height: 20px;
   transform: translateX(-50%);
   opacity: 0;
+  z-index: 5;
   pointer-events: none;
   transition: opacity 120ms ease;
 }
@@ -111,8 +106,16 @@
 
 .section-chip-visibility {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  position: static;
+  width: 24px;
+  min-width: 0;
+  height: 100%;
+  border-radius: 0;
+  padding: 0;
+}
+
+.section-chip-delete {
+  width: 24px;
   min-width: 0;
   height: 100%;
   border-radius: 0;
@@ -125,10 +128,12 @@
 
 .section-chip-playhead {
   position: absolute;
+  z-index: 2;
   width: 1px;
   height: 5px;
   transform: translateX(-1px);
   background: var(--cream);
+  pointer-events: none;
 }
 
 .section-chip-playhead.top {
@@ -149,6 +154,16 @@
   font-size: 1rem;
   line-height: 0.5;
   font-weight: bold;
+}
+
+.section-strip {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: var(--section-chip-gap, 1px);
+  padding: 0;
+  background: transparent;
+  overflow: visible;
 }
 
 .radial-sequencer.dragging,
@@ -274,6 +289,7 @@
   stroke-width: 4;
   stroke-linecap: butt;
   pointer-events: none;
+  user-select: none;
 }
 
 .ring-offset-limit {
@@ -281,6 +297,7 @@
   stroke-width: 1;
   stroke-linecap: butt;
   pointer-events: none;
+  user-select: none;
 }
 
 .ring-offset-label {
@@ -292,6 +309,7 @@
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.9),
     0 0 4px rgba(0, 0, 0, 0.9);
+  user-select: none;
 }
 
 .playhead-line {

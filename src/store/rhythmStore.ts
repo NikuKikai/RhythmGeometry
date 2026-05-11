@@ -222,6 +222,7 @@ interface RhythmState {
   selectSection: (sectionId: string) => void;
   addSection: () => void;
   toggleSectionEnabled: (sectionId: string) => void;
+  deleteSection: (sectionId: string) => void;
   selectRing: (ringId: string) => void;
   toggleNote: (ringId: string, noteIndex: number) => void;
   setNoteLevel: (ringId: string, noteIndex: number, level: number) => void;
@@ -491,6 +492,39 @@ export const useRhythmStore = create<RhythmState>((set, get) => ({
       section.id === sectionId ? { ...section, isEnabled: !section.isEnabled } : section,
     );
     updateAndPersist(set, get, { sections: nextSections });
+  },
+
+  deleteSection: (sectionId) => {
+    const state = get();
+    if (state.sections.length <= 1) {
+      return;
+    }
+
+    const sectionIndex = state.sections.findIndex((section) => section.id === sectionId);
+    if (sectionIndex < 0) {
+      return;
+    }
+
+    const nextSections = state.sections.filter((section) => section.id !== sectionId);
+    const fallbackSectionId =
+      nextSections[Math.min(sectionIndex, nextSections.length - 1)]?.id ?? nextSections[0]?.id ?? "";
+    const synced = syncCurrentSectionState(
+      nextSections,
+      state.currentSectionId === sectionId ? fallbackSectionId : state.currentSectionId,
+      state.selectedRingId,
+      getSelectedRingIndex(state.rings, state.selectedRingId),
+    );
+
+    updateAndPersist(set, get, {
+      ...synced,
+      transport: {
+        ...state.transport,
+        playbackSectionId:
+          state.transport.playbackSectionId === sectionId
+            ? fallbackSectionId
+            : state.transport.playbackSectionId,
+      },
+    });
   },
 
   selectRing: (ringId) => {

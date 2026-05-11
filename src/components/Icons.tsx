@@ -95,3 +95,25 @@ export function FollowSectionsIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function PanelLeftIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 5h14v14H5z" />
+      <path d="M10 5v14" />
+      <path d="M13 12h4" />
+      <path d="m15 10 2 2-2 2" />
+    </svg>
+  );
+}
+
+export function PanelRightIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 5h14v14H5z" />
+      <path d="M14 5v14" />
+      <path d="M7 12h4" />
+      <path d="m9 10-2 2 2 2" />
+    </svg>
+  );
+}

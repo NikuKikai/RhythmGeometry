@@ -1,14 +1,146 @@
+.arrangement-dock {
+  --arrangement-transport-width: 120px;
+  --section-chip-width: 60px;
+  --section-chip-gap: 1px;
+  --scroll-viewport-fade-width: 16px;
+  padding-right: 8px;
+  padding-left: 8px;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel);
+  overflow: visible;
+}
+
+.scroll-viewport {
+  --scroll-viewport-top-inset: 0px;
+  --scroll-viewport-bottom-inset: 0px;
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
+
+.scroll-viewport-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: var(--scroll-viewport-fade-width, 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.scroll-viewport-fade.is-visible {
+  opacity: 1;
+}
+
+.scroll-viewport-fade-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(20, 29, 31, 0.72), rgba(20, 29, 31, 0));
+}
+
+.scroll-viewport-fade-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(20, 29, 31, 0.72), rgba(20, 29, 31, 0));
+}
+
+.scroll-viewport-scroller {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  cursor: grab;
+  padding-top: var(--scroll-viewport-top-inset);
+  padding-bottom: var(--scroll-viewport-bottom-inset);
+  margin-top: calc(var(--scroll-viewport-top-inset) * -1);
+  margin-bottom: calc(var(--scroll-viewport-bottom-inset) * -1);
+}
+
+.scroll-viewport-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-viewport-scroller:active {
+  cursor: grabbing;
+}
+
+.scroll-viewport-content {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  overflow: visible;
+}
+
+.arrangement-toolbar {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 6px 0;
+  gap: 8px;
+  overflow: visible;
+}
+
+.arrangement-transport {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: var(--arrangement-transport-width);
+  flex: 0 0 var(--arrangement-transport-width);
+  min-width: 0;
+}
+
+.arrangement-sections {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  align-self: center;
+}
+
+.arrangement-sections-content {
+  justify-content: center;
+  align-items: center;
+}
+
 .timeline {
   display: flex;
   align-items: center;
-  padding: 8px 4px;
-  overflow: hidden;
+  padding: 4px 0;
   height: 68px;
+  overflow: hidden;
+}
+
+.timeline > .scroll-viewport-fade {
+  z-index: 4;
+}
+
+.timeline > .scroll-viewport-fade-left {
+  background: linear-gradient(to right, rgba(20, 29, 31, 0.94), rgba(20, 29, 31, 0));
+}
+
+.timeline > .scroll-viewport-fade-right {
+  background: linear-gradient(to left, rgba(20, 29, 31, 0.94), rgba(20, 29, 31, 0));
+}
+
+.arrangement-sections > .scroll-viewport-scroller,
+.timeline > .scroll-viewport-scroller {
+  width: 100%;
 }
 
 .timeline-track {
   position: relative;
-  flex-grow: 1;
+  width: 100%;
+  min-width: 100%;
   height: calc(var(--track-count) * 12px);
   min-height: 12px;
   border-radius: 4px;
