@@ -56,9 +56,14 @@ export function HorizontalScrollViewport({
     }
 
     function updateFadeState() {
-      const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-      setCanScrollLeft(scroller.scrollLeft > 0.5);
-      setCanScrollRight(scroller.scrollLeft < maxScrollLeft - 0.5);
+      const currentScroller = scrollerRef.current;
+      if (!currentScroller) {
+        return;
+      }
+
+      const maxScrollLeft = Math.max(0, currentScroller.scrollWidth - currentScroller.clientWidth);
+      setCanScrollLeft(currentScroller.scrollLeft > 0.5);
+      setCanScrollRight(currentScroller.scrollLeft < maxScrollLeft - 0.5);
     }
 
     updateFadeState();
