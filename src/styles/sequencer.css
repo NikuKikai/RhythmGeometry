@@ -54,7 +54,7 @@
 .section-chip-fill {
   width: 100%;
   height: 100%;
-  background: rgba(244, 234, 220, 0.34);
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .section-chip.is-current .section-chip-fill {
@@ -63,24 +63,20 @@
 
 .section-chip.is-disabled .section-chip-fill {
   background:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(244, 234, 220, 0.34) 0,
-      rgba(244, 234, 220, 0.34) 3px,
-      rgba(244, 234, 220, 0.08) 3px,
-      rgba(244, 234, 220, 0.08) 6px
-    );
+    repeating-linear-gradient(-45deg,
+      rgba(255, 255, 255, 0.34) 0,
+      rgba(255, 255, 255, 0.34) 3px,
+      rgba(255, 255, 255, 0.08) 3px,
+      rgba(255, 255, 255, 0.08) 6px);
 }
 
 .section-chip.is-current.is-disabled .section-chip-fill {
   background:
-    repeating-linear-gradient(
-      -45deg,
+    repeating-linear-gradient(-45deg,
       var(--cream) 0,
       var(--cream) 3px,
-      rgba(244, 234, 220, 0.22) 3px,
-      rgba(244, 234, 220, 0.22) 6px
-    );
+      rgba(255, 255, 255, 0.22) 3px,
+      rgba(255, 255, 255, 0.22) 6px);
 }
 
 .section-chip-hover {
@@ -146,7 +142,7 @@
 }
 
 .section-chip-add {
-  border: 1px solid rgba(244, 234, 220, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .section-chip-add-mark {
@@ -172,12 +168,8 @@
   cursor: grabbing;
 }
 
-.sequencer-core {
-  fill: rgba(248, 239, 228, 0.08);
-}
-
 .ring-cell {
-  fill: rgba(244, 234, 220, 0.05);
+  fill: rgba(255, 255, 255, 0.1);
   stroke: rgba(23, 20, 17, 0.72);
   stroke-width: 0.6;
   cursor: default;
@@ -188,31 +180,31 @@
 }
 
 .ring.selected .ring-cell {
-  fill: rgba(244, 234, 220, 0.085);
+  fill: rgba(255, 255, 255, 0.15);
   stroke: rgba(23, 20, 17, 0.72);
 }
 
 .ring-cell:hover {
-  fill: rgba(244, 234, 220, 0.105);
+  fill: rgba(255, 255, 255, 0.15);
   stroke: rgba(23, 20, 17, 0.72);
 }
 
 .ring.selected .ring-cell:hover {
-  fill: rgba(244, 234, 220, 0.125);
+  fill: rgba(255, 255, 255, 0.2);
 }
 
 .ring-cell.active {
-  fill: color-mix(in srgb, var(--ring-color) 48%, rgba(244, 234, 220, 0.05));
+  fill: color-mix(in srgb, var(--ring-color) 48%, rgba(255, 255, 255, 0.05));
   stroke: rgba(23, 20, 17, 0.72);
 }
 
 .ring.selected .ring-cell.active {
-  fill: color-mix(in srgb, var(--ring-color) 54%, rgba(244, 234, 220, 0.075));
+  fill: color-mix(in srgb, var(--ring-color) 54%, rgba(255, 255, 255, 0.075));
 }
 
 .ring-cell.active:hover,
 .ring.selected .ring-cell.active:hover {
-  fill: color-mix(in srgb, var(--ring-color) 62%, rgba(244, 234, 220, 0.09));
+  fill: color-mix(in srgb, var(--ring-color) 62%, rgba(255, 255, 255, 0.09));
 }
 
 .note-polygon {
@@ -314,7 +306,7 @@
 }
 
 .playhead-line {
-  stroke: rgba(244, 234, 220, 0.82);
+  stroke: rgba(255, 255, 255, 0.82);
   stroke-width: 2.5;
   stroke-linecap: round;
   pointer-events: none;

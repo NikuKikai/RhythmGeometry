@@ -47,7 +47,7 @@ export function getRingCellPath({
   stepIndex,
   division,
   phaseOffset = 0,
-  gapRadians = 0.012,
+  gapRadians = 0.0,
 }: RingCellPathInput): string {
   const stepSize = (Math.PI * 2) / division;
   const startAngle = START_ANGLE + (stepIndex + phaseOffset) * stepSize + gapRadians;

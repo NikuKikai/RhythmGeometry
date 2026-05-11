@@ -89,7 +89,6 @@ export const RadialRingShell = memo(function RadialRingShell({
               stepIndex,
               division: ring.division,
               phaseOffset,
-              gapRadians: 0,
             })}
             className={active ? "ring-cell active" : "ring-cell"}
             style={{
