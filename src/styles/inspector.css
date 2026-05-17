@@ -10,6 +10,7 @@
 
 .inspector-body {
   display: grid;
+  grid-auto-rows: max-content;
   align-content: start;
   gap: 10px;
   min-height: 0;
@@ -138,7 +139,7 @@
 }
 
 .inspector-histogram-section {
-  min-height: 0;
+  min-height: max-content;
 }
 
 .inspector-generator-row {
@@ -197,16 +198,37 @@
 
 .histogram {
   --histogram-columns: 1;
+  --histogram-value-row-height: 16px;
+  --histogram-bar-row-height: 72px;
+  --histogram-label-row-height: 16px;
   display: grid;
   grid-template-columns: repeat(var(--histogram-columns), minmax(0, 1fr));
   gap: 1px;
   width: 100%;
-  min-height: 64px;
-  padding-top: 4px;
-  overflow-x: hidden;
+  height: calc(
+    var(--histogram-value-row-height) +
+    var(--histogram-bar-row-height) +
+    var(--histogram-label-row-height)
+  );
+  min-height: calc(
+    var(--histogram-value-row-height) +
+    var(--histogram-bar-row-height) +
+    var(--histogram-label-row-height)
+  );
+  max-height: calc(
+    var(--histogram-value-row-height) +
+    var(--histogram-bar-row-height) +
+    var(--histogram-label-row-height)
+  );
+  overflow: hidden;
 }
 
 .histogram-column {
+  display: grid;
+  grid-template-rows:
+    var(--histogram-value-row-height)
+    var(--histogram-bar-row-height)
+    var(--histogram-label-row-height);
   min-width: 0;
   color: var(--text-muted);
   font-size: 0.72rem;
@@ -214,9 +236,13 @@
 }
 
 .histogram-column span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  display: block;
-  margin: 2px 0;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
 }
 
 .histogram-bar-track {
@@ -224,7 +250,7 @@
   display: flex;
   align-items: end;
   width: 100%;
-  height: 72px;
+  height: var(--histogram-bar-row-height);
   border-radius: 0;
   background: rgba(244, 234, 220, 0.08);
   overflow: hidden;

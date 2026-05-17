@@ -173,6 +173,7 @@ export function Inspector() {
               >
                 {gttmHierarchy.map((item) => (
                   <div className="histogram-column histogram-column" key={item.step}>
+                    <span aria-hidden="true" />
                     <div className="histogram-bar-track">
                       <div
                         className={item.isNote ? "histogram-bar histogram-bar-note" : "histogram-bar histogram-bar-muted"}
