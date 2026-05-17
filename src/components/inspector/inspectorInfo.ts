@@ -6,7 +6,8 @@ export type InspectorInfoKey =
   | "gttmSyncopation"
   | "oddity"
   | "lbdmGrouping"
-  | "centroidBalanced";
+  | "centroidBalanced"
+  | "phaseSpacePlot";
 
 export interface InspectorInfoDefinition {
   label: string;
@@ -54,5 +55,10 @@ export const INSPECTOR_INFO: Record<InspectorInfoKey, InspectorInfoDefinition> =
     label: "Centroid Balanced",
     title: "Centroid Balanced",
     description: "Computes the centroid of the active onsets on the unit circle, including the track phase offset. The displayed value is the centroid distance from the center: lower means more balanced. The eye toggle shows the centroid vector on the radial sequencer.",
+  },
+  phaseSpacePlot: {
+    label: "Phase Space Plot",
+    title: "Phase Space Plot",
+    description: "Plots successive adjacent interonset intervals as ordered pairs (IOI_n, IOI_n+1). Repeated structures cluster on repeated coordinates, while more varied rhythms spread across the square.",
   },
 };

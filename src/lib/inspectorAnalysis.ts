@@ -24,6 +24,11 @@ export interface LbdmGroupingEdge {
   isMutual: boolean;
 }
 
+export interface PhaseSpacePoint {
+  x: number;
+  y: number;
+}
+
 export function getOddityViolationCount(notes: number[], division: number): number {
   const nextDivision = clampDivision(division);
   if (nextDivision % 2 !== 0) {
@@ -119,6 +124,21 @@ export function getRhythmicContours(intervals: number[]): string[] {
     }
     return "=";
   });
+}
+
+export function getPhaseSpacePoints(intervals: number[]): PhaseSpacePoint[] {
+  if (intervals.length === 0) {
+    return [];
+  }
+
+  if (intervals.length === 1) {
+    return [{ x: intervals[0], y: intervals[0] }];
+  }
+
+  return intervals.map((interval, index) => ({
+    x: interval,
+    y: intervals[(index + 1) % intervals.length],
+  }));
 }
 
 export function getFullIntervalContent(notes: number[], division: number): IntervalContentBin[] {

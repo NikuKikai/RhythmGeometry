@@ -15,6 +15,7 @@ import { INSPECTOR_INFO, type InspectorInfoKey } from "./inspector/inspectorInfo
 import { CentroidBalancedSection } from "./inspector/CentroidBalancedSection";
 import { LbdmGroupingSection } from "./inspector/LbdmGroupingSection";
 import { OdditySection } from "./inspector/OdditySection";
+import { PhaseSpacePlotSection } from "./inspector/PhaseSpacePlotSection";
 
 function formatSequence(values: Array<number | string>): string {
   return values.length > 0 ? values.join(" ") : "None";
@@ -107,9 +108,11 @@ export function Inspector() {
 
         <div className="inspector-body">
           <section className="inspector-section">
-            <InspectorLabel infoKey="track"
+            <InspectorLabel
+              infoKey="track"
               valueText={selectedRing?.label ?? "None"}
-             onOpenInfo={setOpenInfoKey} />
+              onOpenInfo={setOpenInfoKey}
+            />
           </section>
 
           <section className="inspector-section">
@@ -172,7 +175,7 @@ export function Inspector() {
                 aria-label="GTTM accent hierarchy histogram"
               >
                 {gttmHierarchy.map((item) => (
-                  <div className="histogram-column histogram-column" key={item.step}>
+                  <div className="histogram-column" key={item.step}>
                     <span aria-hidden="true" />
                     <div className="histogram-bar-track">
                       <div
@@ -192,6 +195,10 @@ export function Inspector() {
           <OdditySection onOpenInfo={setOpenInfoKey} />
           <LbdmGroupingSection onOpenInfo={setOpenInfoKey} />
           <CentroidBalancedSection onOpenInfo={setOpenInfoKey} />
+          <PhaseSpacePlotSection
+            adjacentIntervals={adjacentIntervals}
+            onOpenInfo={setOpenInfoKey}
+          />
         </div>
       </aside>
 

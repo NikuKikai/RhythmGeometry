@@ -282,6 +282,54 @@
   background: rgba(244, 234, 220, 0.25);
 }
 
+.phase-space-plot-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.phase-space-plot {
+  width: 100%;
+  max-width: 180px;
+  height: 180px;
+  overflow: visible;
+}
+
+.phase-space-frame {
+  fill: rgba(244, 234, 220, 0.04);
+  stroke: rgba(244, 234, 220, 0.22);
+  stroke-width: 1;
+}
+
+.phase-space-grid-line {
+  stroke: rgba(244, 234, 220, 0.08);
+  stroke-width: 1;
+}
+
+.phase-space-line {
+  fill: none;
+  stroke: rgba(244, 234, 220, 0.42);
+  stroke-width: 1.2;
+}
+
+.phase-space-arrowhead {
+  fill: rgba(244, 234, 220, 0.42);
+}
+
+.phase-space-point {
+  fill: var(--accent);
+}
+
+.phase-space-point-first {
+  fill: var(--cream);
+}
+
+.phase-space-axis-value {
+  fill: var(--text-muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
 .inspector-info-backdrop {
   position: fixed;
   inset: 0;
